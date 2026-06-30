@@ -1,0 +1,31 @@
+{
+  "name": "gourmet-getaway-tours",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "tsx scripts/seed-tours.ts"
+  },
+  "dependencies": {
+    "firebase": "^11.3.1",
+    "firebase-admin": "^13.1.0",
+    "next": "^15.5.19",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "resend": "^4.1.2",
+    "server-only": "^0.0.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "^15.5.19",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

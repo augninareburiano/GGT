@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// All privileged access (reads of enquiries, any writes) happens server-side
+// through the Firebase Admin SDK in Next.js API routes, which bypasses these
+// rules. These rules therefore lock down all direct client access.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Tours: nothing readable/writable directly from the client. The public
+    // homepage reads tours via the Admin SDK (server). Tighten as needed if you
+    // later want client reads.
+    match /tours/{tourId} {
+      allow read, write: if false;
+    }
+
+    // Enquiries: never accessible from the client. Created and read only via
+    // the Admin SDK in API routes.
+    match /enquiries/{enquiryId} {
+      allow read, write: if false;
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
