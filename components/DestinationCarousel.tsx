@@ -1,0 +1,281 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { SHOWCASE_TOURS } from "@/lib/showcase";
+
+/**
+ * A "Globe Express"–style destination carousel that doubles as the landing hero.
+ *
+ * Two motions work together on each advance:
+ *  1. Morph — the clicked/leading thumbnail expands (FLIP-style) from its exact
+ *     on-screen box out to fill the whole background, then the background
+ *     commits to that slide underneath it. See `morphTo`.
+ *  2. Scroll — the thumbnail strip slides left by one card, the leading card
+ *     having morphed away and a fresh card entering from the right.
+ *
+ * Slides are the shared "Nine ways to spend the day" tours (lib/showcase).
+ */
+const MORPH_MS = 720; // duration of both the morph and the strip slide
+const SLIDE_MS = 6000; // autoplay dwell per slide
+const SLIDE_SEC = SLIDE_MS / 1000;
+const VISIBLE = 3; // thumbnails fully in view; one more is rendered to slide in
+const EASE = "cubic-bezier(.7,0,.2,1)";
+
+const fmt = (s: number) =>
+  `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+export default function DestinationCarousel() {
+  const slides = SHOWCASE_TOURS;
+  const n = slides.length;
+
+  const [index, setIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [elapsed, setElapsed] = useState(0);
+  const [morphingId, setMorphingId] = useState<number | null>(null);
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const cloneRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const thumbRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  // Mirror of `animating` that `go` can read live — the autoplay timeout closes
+  // over stale state, so the ref is what actually gates re-entry.
+  const animatingRef = useRef(false);
+  const setAnim = (v: boolean) => {
+    animatingRef.current = v;
+    setAnimating(v);
+  };
+
+  // Upcoming slides in order; one extra is rendered so it can slide in from the
+  // right during the transition (wraps around).
+  const renderCount = Math.min(VISIBLE + 1, n);
+  const windowIds = Array.from(
+    { length: renderCount },
+    (_, k) => (index + 1 + k) % n,
+  );
+
+  const prefersReduced = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Land on the new slide: re-index, snap the strip back to rest, drop the clone.
+  const finalize = (target: number) => {
+    const track = trackRef.current;
+    if (track) {
+      track.style.transition = "none";
+      track.style.transform = "translateX(0)";
+    }
+    setMorphingId(null);
+    setIndex(target);
+
+    const clone = cloneRef.current;
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (clone) clone.style.display = "none";
+        setAnim(false);
+      }),
+    );
+  };
+
+  const morphTo = (target: number) => {
+    const section = sectionRef.current;
+    const clone = cloneRef.current;
+    const thumb = thumbRefs.current[target];
+    if (!section || !clone || !thumb) {
+      setIndex(target);
+      return;
+    }
+
+    setAnim(true);
+    const isNext = target === (index + 1) % n;
+    const sr = section.getBoundingClientRect();
+    const tr = thumb.getBoundingClientRect();
+
+    // 1) Morph the thumbnail out to fill the background.
+    clone.style.transition = "none";
+    clone.style.background = slides[target].bg;
+    clone.style.backgroundSize = "cover";
+    clone.style.backgroundPosition = "center";
+    clone.style.left = `${tr.left - sr.left}px`;
+    clone.style.top = `${tr.top - sr.top}px`;
+    clone.style.width = `${tr.width}px`;
+    clone.style.height = `${tr.height}px`;
+    clone.style.borderRadius = "16px";
+    clone.style.display = "block";
+    void clone.offsetWidth; // reflow so the start box is registered
+    clone.style.transition = [
+      `left ${MORPH_MS}ms ${EASE}`,
+      `top ${MORPH_MS}ms ${EASE}`,
+      `width ${MORPH_MS}ms ${EASE}`,
+      `height ${MORPH_MS}ms ${EASE}`,
+      `border-radius ${MORPH_MS}ms ease`,
+    ].join(",");
+    clone.style.left = "0px";
+    clone.style.top = "0px";
+    clone.style.width = `${sr.width}px`;
+    clone.style.height = `${sr.height}px`;
+    clone.style.borderRadius = "0px";
+
+    // 2) On a natural "next", slide the strip left by one card as the leading
+    //    card morphs away.
+    if (isNext) {
+      setMorphingId(target); // hide the morphing card so only the clone shows
+      const track = trackRef.current;
+      const first = thumbRefs.current[windowIds[0]];
+      const second = thumbRefs.current[windowIds[1]];
+      if (track && first && second) {
+        const step =
+          second.getBoundingClientRect().left -
+          first.getBoundingClientRect().left;
+        track.style.transition = "none";
+        track.style.transform = "translateX(0)";
+        void track.offsetWidth;
+        track.style.transition = `transform ${MORPH_MS}ms ${EASE}`;
+        track.style.transform = `translateX(-${step}px)`;
+      }
+    }
+
+    window.setTimeout(() => finalize(target), MORPH_MS);
+  };
+
+  const go = (target: number) => {
+    if (target === index || animatingRef.current) return;
+    if (prefersReduced() || !thumbRefs.current[target]) {
+      setIndex(target); // fallback: plain cross-fade of the bg layers
+      return;
+    }
+    morphTo(target);
+  };
+
+  const next = () => go((index + 1) % n);
+  const prev = () => go((index - 1 + n) % n);
+
+  // Autoplay: advance after the dwell, restart on every change.
+  useEffect(() => {
+    if (!playing) return;
+    const id = window.setTimeout(() => go((index + 1) % n), SLIDE_MS);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, index]);
+
+  // Timer readout, reset whenever the slide changes.
+  useEffect(() => {
+    setElapsed(0);
+    if (!playing) return;
+    const id = window.setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [index, playing]);
+
+  const slide = slides[index];
+
+  return (
+    <section className="dc" ref={sectionRef} id="destinations">
+      {slides.map((s, i) => (
+        <div
+          key={i}
+          className="dc-bg-layer"
+          style={{ background: s.bg, opacity: i === index ? 1 : 0 }}
+        />
+      ))}
+
+      {/* Bottom scrim keeps the controls legible over bright slides. */}
+      <div className="dc-scrim" aria-hidden />
+
+      {/* The morphing clone lives above the background, below the UI. */}
+      <div className="dc-clone" ref={cloneRef} aria-hidden />
+
+      <div className="wrap dc-inner">
+        <div className="dc-copy" key={index}>
+          <p className="dc-region">{slide.region}</p>
+          <h2 className="dc-title">{slide.name}</h2>
+          <p className="dc-blurb">{slide.blurb}</p>
+          <div className="dc-cta">
+            <a href="#builder" className="btn btn-primary">
+              Build your tour →
+            </a>
+            <a href="#destinations" className="btn btn-light">
+              Discover location
+            </a>
+          </div>
+        </div>
+
+        <div className="dc-thumbs">
+          <div className="dc-track" ref={trackRef}>
+            {windowIds.map((id, k) => (
+              <button
+                key={`${id}-${k}`}
+                type="button"
+                className={k === 0 ? "dc-thumb dc-thumb-next" : "dc-thumb"}
+                style={{
+                  background: slides[id].bg,
+                  opacity: id === morphingId ? 0 : 1,
+                }}
+                ref={(el) => {
+                  thumbRefs.current[id] = el;
+                }}
+                onClick={() => go(id)}
+                tabIndex={k >= VISIBLE ? -1 : 0}
+                aria-label={`Go to ${slides[id].name}`}
+              >
+                <span className="dc-cap">{slides[id].name}</span>
+                <span className="dc-price">
+                  <span className="dc-from">from</span> {slides[id].from}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="dc-controls">
+          <div className="dc-time">
+            <button
+              type="button"
+              className="dc-play"
+              onClick={() => setPlaying((p) => !p)}
+              aria-label={playing ? "Pause" : "Play"}
+            >
+              {playing ? "❚❚" : "►"}
+            </button>
+            <span className="dc-progress">
+              <span
+                key={index}
+                className="dc-fill"
+                style={{
+                  animationDuration: `${SLIDE_MS}ms`,
+                  animationPlayState: playing ? "running" : "paused",
+                }}
+              />
+            </span>
+            <span className="dc-clock">
+              {fmt(Math.min(elapsed, SLIDE_SEC))} / {fmt(SLIDE_SEC)}
+            </span>
+          </div>
+
+          <div className="dc-nav">
+            <button
+              type="button"
+              onClick={prev}
+              aria-label="Previous"
+              disabled={animating}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              aria-label="Next"
+              disabled={animating}
+            >
+              ›
+            </button>
+          </div>
+
+          <div className="dc-index">
+            <b>{String(index + 1).padStart(2, "0")}</b>
+            <span>/ {String(n).padStart(2, "0")}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

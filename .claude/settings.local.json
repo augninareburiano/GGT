@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(npm install)"
+      "PowerShell(npm install)",
+      "Bash(npx tsc *)"
     ]
   }
 }
