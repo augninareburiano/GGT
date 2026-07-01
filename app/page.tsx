@@ -1,5 +1,4 @@
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
 import DestinationCarousel from "@/components/DestinationCarousel";
 import TwoDoors from "@/components/TwoDoors";
 import StackingCards from "@/components/StackingCards";
@@ -17,7 +16,6 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <Hero />
       <DestinationCarousel />
       <TwoDoors />
       <StackingCards />
