@@ -1,17 +1,10 @@
-"use client";
-
-import { useReveal } from "./useReveal";
+import Link from "next/link";
 
 export default function Footer() {
-  const c1 = useReveal<HTMLDivElement>();
-  const c2 = useReveal<HTMLDivElement>();
-  const c3 = useReveal<HTMLDivElement>();
-  const c4 = useReveal<HTMLDivElement>();
-
   return (
     <footer>
       <div className="wrap foot">
-        <div ref={c1.ref} className={c1.className}>
+        <div>
           <div className="brand" style={{ color: "var(--oat)" }}>
             Gourmet<span>.</span>Getaway
           </div>
@@ -26,23 +19,34 @@ export default function Footer() {
             Food, wine &amp; adventure tours from Sydney, New South Wales.
           </p>
         </div>
-        <div ref={c2.ref} className={c2.className}>
+
+        <div>
           <h5>Tours</h5>
-          <a href="#">Wednesday Hunter Valley</a>
-          <a href="#">Private tours</a>
-          <a href="#builder">Build your tour</a>
+          <Link href="/#wednesday">Wednesday Hunter Valley</Link>
+          <Link href="/#private">Private tours</Link>
+          <Link href="/#builder">Build your tour</Link>
         </div>
-        <div ref={c3.ref} className={c3.className}>
+
+        <div>
           <h5>Company</h5>
-          <a href="#">About Jimmy</a>
-          <a href="#">FAQ</a>
-          <a href="#">Gift cards</a>
+          <Link href="/#about">About Jimmy</Link>
+          <Link href="/#faq">FAQ</Link>
+          <Link href="/#gift-cards">Gift cards</Link>
         </div>
-        <div ref={c4.ref} className={c4.className}>
+
+        <div>
           <h5>Get in touch</h5>
-          <a href="#">+61 416 139 567</a>
-          <a href="#">Instagram</a>
-          <a href="#">Facebook</a>
+          <a href="tel:+61416139567">+61 416 139 567</a>
+          <a
+            href="https://www.instagram.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Instagram
+          </a>
+          <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">
+            Facebook
+          </a>
         </div>
       </div>
     </footer>

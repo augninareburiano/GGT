@@ -1,0 +1,450 @@
+<!-- Gourmet Getaway Tours — homepage design mockup (Verdana + interactive builder) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gourmet Getaway Tours — design mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --olive:#5F7321;
+    --olive-deep:#3C4A14;
+    --ink:#211C24;
+    --oat:#F3ECD8;
+    --paper:#FFFBF2;
+    --marmalade:#FF5E1A;
+    --sea:#0E8C8C;
+    --gold:#F4B400;
+    --stone:#9A9483;
+    --radius:18px;
+    --font:Verdana,Geneva,Tahoma,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  .mono{font-family:'IBM Plex Mono',monospace}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--olive)}
+  h1,h2,h3,h4{font-family:var(--font);line-height:1.05;font-weight:bold;letter-spacing:-.02em}
+  a{color:inherit;text-decoration:none}
+
+  :focus-visible{outline:3px solid var(--marmalade);outline-offset:2px;border-radius:6px}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    font-family:var(--font);font-weight:bold;font-size:15px;
+    padding:14px 22px;border-radius:999px;border:1.5px solid transparent;
+    transition:transform .14s ease, box-shadow .14s ease, background .14s ease;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:translateY(0)}
+  .btn-primary{background:var(--marmalade);color:#fff;box-shadow:0 8px 18px -8px rgba(255,94,26,.7)}
+  .btn-primary:hover{box-shadow:0 12px 24px -8px rgba(255,94,26,.8)}
+  .btn-ghost{border-color:var(--ink);color:var(--ink)}
+  .btn-ghost:hover{background:var(--ink);color:var(--paper)}
+  .btn-light{border-color:rgba(255,255,255,.6);color:#fff}
+  .btn-light:hover{background:#fff;color:var(--ink)}
+
+  /* header */
+  header{position:sticky;top:0;z-index:60;background:rgba(255,251,242,.88);backdrop-filter:blur(8px);border-bottom:1px solid rgba(33,28,36,.08)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .brand{font-family:var(--font);font-weight:bold;font-size:19px;letter-spacing:-.02em}
+  .brand span{color:var(--marmalade)}
+  .nav-links{display:flex;gap:24px;align-items:center;font-size:14px}
+  .nav-links a:not(.btn):hover{color:var(--olive)}
+  .nav .btn{padding:10px 18px;font-size:13px}
+  .menu-btn{display:none;background:none;border:1.5px solid var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer;font-family:'IBM Plex Mono';font-size:13px}
+  @media(max-width:780px){
+    .menu-btn{display:block}
+    .nav-links{position:absolute;top:70px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--paper);border-bottom:1px solid rgba(33,28,36,.1);padding:8px 28px 18px;display:none}
+    .nav-links.open{display:flex}
+    .nav-links a:not(.btn){padding:12px 0;border-bottom:1px solid rgba(33,28,36,.08)}
+    .nav-links .btn{margin-top:12px;justify-content:center}
+  }
+
+  /* hero */
+  .hero{padding:64px 0 40px;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  .hero h1{font-size:clamp(38px,5.5vw,68px)}
+  .hero h1 em{font-style:normal;color:var(--marmalade)}
+  .hero p{font-size:17px;max-width:34ch;margin:22px 0 28px;color:#43403b}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+  .stack{position:relative;height:440px}
+  .ph{position:absolute;border-radius:var(--radius);box-shadow:0 24px 50px -20px rgba(33,28,36,.45);overflow:hidden}
+  .ph span{position:absolute;bottom:12px;left:14px;color:#fff;font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.1em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+  .ph1{width:62%;height:78%;top:0;right:0;background:linear-gradient(150deg,#8FB31E,#3C4A14)}
+  .ph2{width:54%;height:60%;left:0;top:24%;background:linear-gradient(150deg,#FF7A2E,#D63E00)}
+  .ph3{width:40%;height:38%;right:6%;bottom:0;background:linear-gradient(150deg,#19B3B3,#0A6E6E)}
+  .tag{position:absolute;top:6%;left:-4%;background:var(--gold);color:var(--ink);border-radius:999px;padding:8px 14px;font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.06em;box-shadow:0 8px 20px -8px rgba(0,0,0,.35);font-weight:500}
+  @media(max-width:780px){.hero-grid{grid-template-columns:1fr}.stack{height:340px;margin-top:8px}}
+
+  /* doors */
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:30px 0 70px}
+  .door{border-radius:var(--radius);padding:30px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between}
+  .door h3{font-size:24px;margin-bottom:4px}
+  .door.a{background:var(--olive);color:#fff}
+  .door.b{background:var(--sea);color:#fff}
+  .door p{margin:10px 0 0;font-size:14px;opacity:.95}
+  @media(max-width:680px){.doors{grid-template-columns:1fr}}
+
+  /* stacking cards (signature) */
+  .stacksec{background:var(--ink);color:var(--paper);padding:80px 0 40px}
+  .stacksec .head{display:flex;justify-content:space-between;align-items:end;margin-bottom:30px;flex-wrap:wrap;gap:16px}
+  .stacksec h2{font-size:clamp(28px,4.2vw,48px);color:var(--paper)}
+  .stacksec .eyebrow{color:var(--marmalade)}
+  .cards{display:flex;flex-direction:column;gap:24px}
+  .card{position:sticky;top:90px;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1.1fr 1fr;min-height:300px;box-shadow:0 -10px 40px -20px rgba(0,0,0,.6)}
+  .card .art{position:relative}
+  .card .art span{position:absolute;bottom:16px;left:18px;font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+  .card .body{padding:34px;display:flex;flex-direction:column;justify-content:center;gap:12px;background:var(--paper);color:var(--ink)}
+  .card h3{font-size:26px}
+  .card .from{font-family:'IBM Plex Mono';font-size:14px;color:var(--olive)}
+  .card .from b{font-size:22px;color:var(--ink)}
+  .card .mini{font-size:14px;color:#5a564f}
+  .c1 .art{background:linear-gradient(150deg,#8FB31E,#3C4A14)}
+  .c2 .art{background:linear-gradient(150deg,#19B3B3,#0A6E6E)}
+  .c3 .art{background:linear-gradient(150deg,#FF7A2E,#D63E00)}
+  .c4 .art{background:linear-gradient(150deg,#F4B400,#B5790A)}
+  @media(max-width:680px){.card{grid-template-columns:1fr}.card .art{min-height:160px}.card{position:relative;top:0}}
+
+  /* interactive builder */
+  .builder{padding:84px 0}
+  .builder-title{font-size:clamp(28px,4.2vw,46px);max-width:18ch;margin:6px 0 30px}
+  .builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+  .field{margin-bottom:24px}
+  .flabel{display:block;font-family:'IBM Plex Mono';font-size:13px;letter-spacing:.04em;color:var(--olive);margin-bottom:10px;font-weight:500}
+  select{width:100%;padding:14px 16px;font-family:var(--font);font-size:16px;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;background:#fff;cursor:pointer}
+  .stepper{display:inline-flex;align-items:center;gap:0;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;overflow:hidden;background:#fff}
+  .stepper button{width:48px;height:48px;border:none;background:#fff;font-size:22px;cursor:pointer;color:var(--ink);transition:background .12s}
+  .stepper button:hover{background:var(--oat)}
+  .stepper output{min-width:56px;text-align:center;font-family:'IBM Plex Mono';font-size:18px;border-left:1.5px solid rgba(33,28,36,.12);border-right:1.5px solid rgba(33,28,36,.12);line-height:48px}
+  .addons{display:flex;flex-direction:column;gap:10px}
+  .addon{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1.5px solid rgba(33,28,36,.18);border-radius:12px;cursor:pointer;transition:border-color .12s, background .12s}
+  .addon:hover{border-color:var(--olive)}
+  .addon.on{border-color:var(--olive);background:rgba(95,115,33,.08)}
+  .addon .left{display:flex;align-items:center;gap:12px;font-size:15px}
+  .addon .box{width:22px;height:22px;border:2px solid var(--stone);border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;font-size:14px;color:#fff}
+  .addon.on .box{background:var(--olive);border-color:var(--olive)}
+  .addon .price{font-family:'IBM Plex Mono';font-size:14px;color:var(--ink)}
+
+  .bill{background:var(--olive-deep);color:var(--paper);border-radius:20px;padding:28px;box-shadow:0 30px 60px -30px rgba(0,0,0,.5);position:sticky;top:90px}
+  .bill .t{font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+  .bill h4{font-size:21px;margin:6px 0 16px}
+  .line{display:flex;justify-content:space-between;gap:14px;font-family:'IBM Plex Mono';font-size:14px;padding:9px 0;border-bottom:1px dashed rgba(246,242,233,.25)}
+  .line.add{opacity:.9}
+  .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px}
+  .total .mono{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+  .total b{font-size:32px;color:var(--marmalade)}
+  @media(max-width:780px){.builder-grid{grid-template-columns:1fr}.bill{position:relative;top:0}}
+
+  /* jimmy strip */
+  .jimmy{background:var(--sea);color:#fff;border-radius:24px;margin:0 0 84px;padding:46px;display:grid;grid-template-columns:1fr 1.3fr;gap:36px;align-items:center}
+  .jimmy .avatar{height:200px;border-radius:18px;background:linear-gradient(150deg,#3FD0D0,#0A6E6E)}
+  .jimmy h2{font-size:32px;color:#fff}
+  .jimmy p{margin-top:14px;opacity:.95}
+  @media(max-width:680px){.jimmy{grid-template-columns:1fr}}
+
+  footer{background:var(--ink);color:var(--oat);padding:54px 0}
+  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px}
+  .foot a{opacity:.8;font-size:14px;display:block;padding:4px 0}
+  .foot a:hover{opacity:1;color:var(--marmalade)}
+  .foot h5{font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:var(--stone)}
+
+  /* animations */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+  @keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.14)}100%{transform:scale(1)}}
+  .hero .eyebrow{animation:fadeUp .6s ease both .05s}
+  .hero h1{animation:fadeUp .7s ease both .18s}
+  .hero p:not(.eyebrow){animation:fadeUp .7s ease both .32s}
+  .hero-cta{animation:fadeUp .7s ease both .46s}
+  .ph1{animation:popIn .7s cubic-bezier(.2,.7,.2,1) both .42s}
+  .ph2{animation:popIn .7s cubic-bezier(.2,.7,.2,1) both .56s}
+  .ph3{animation:popIn .7s cubic-bezier(.2,.7,.2,1) both .70s}
+  .tag{animation:popIn .6s cubic-bezier(.2,.7,.2,1) both .92s}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  .bill-bump{display:inline-block;animation:bump .35s ease}
+  header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
+  @media(prefers-reduced-motion:reduce){
+    .card{position:relative;top:0}
+    .btn:hover{transform:none}
+    .reveal{opacity:1;transform:none;transition:none}
+    .hero .eyebrow,.hero h1,.hero p:not(.eyebrow),.hero-cta,.ph1,.ph2,.ph3,.tag{animation:none}
+    .bill-bump{animation:none}
+  }
+</style>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">Gourmet<span>.</span>Getaway</div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">Menu</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="#">Wednesday Tour</a>
+      <a href="#">Private Tours</a>
+      <a href="#">About</a>
+      <a href="#builder" class="btn btn-primary">Build your tour</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Small-group &amp; private tours · Sydney NSW</p>
+      <h1>A day out, <em>composed</em> like a tasting menu.</h1>
+      <p>Owner-operated food, wine and adventure tours across New South Wales. Pick the place, set your group, choose your extras — and watch the price add up as you go.</p>
+      <div class="hero-cta">
+        <a href="#builder" class="btn btn-primary">Build your tour →</a>
+        <a href="#" class="btn btn-ghost">Join the Wednesday tour</a>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="ph ph1"><span>Hunter Valley</span></div>
+      <div class="ph ph2"><span>Your chef on the road</span></div>
+      <div class="ph ph3"><span>Blue Mountains</span></div>
+      <div class="tag">★ 30 years in food &amp; wine</div>
+    </div>
+  </div>
+</section>
+
+<!-- TWO DOORS -->
+<section class="wrap">
+  <div class="doors">
+    <div class="door a">
+      <div>
+        <p class="eyebrow" style="color:rgba(255,255,255,.75)">Every Wednesday · up to 16 guests</p>
+        <h3>The Hunter Valley Food &amp; Wine Tour</h3>
+        <p>Our flagship day. Progressive breakfast and lunch cooked by your guide, three wines matched to the menu, door to door.</p>
+      </div>
+      <a href="#" class="btn btn-light" style="align-self:flex-start;margin-top:18px">From A$257 →</a>
+    </div>
+    <div class="door b">
+      <div>
+        <p class="eyebrow" style="color:rgba(255,255,255,.8)">9 destinations · your itinerary</p>
+        <h3>Build a private tour</h3>
+        <p>Just your group. Choose a destination, the number of guests and the extras you fancy — oyster farm, truffle hunt, distillery and more.</p>
+      </div>
+      <a href="#builder" class="btn btn-light" style="align-self:flex-start;margin-top:18px">Start building →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STACKING CARDS -->
+<section class="stacksec">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Pick a starting point</p>
+        <h2>Nine ways to spend the day.</h2>
+      </div>
+      <a href="#" class="btn btn-light">See all tours</a>
+    </div>
+    <div class="cards">
+      <div class="card c1">
+        <div class="art"><span>Vineyards &amp; cellar doors</span></div>
+        <div class="body"><h3>Hunter Valley, private</h3><p class="mini">Cellar doors, long lunch, and a chef who cooks to match every glass.</p><p class="from">from <b>A$220</b> / person</p></div>
+      </div>
+      <div class="card c2">
+        <div class="art"><span>Sand, surf &amp; a cold one</span></div>
+        <div class="body"><h3>Sydney Beaches &amp; Brewery</h3><p class="mini">The coast at its best, finishing with a tasting paddle at a local brewery.</p><p class="from">from <b>A$160</b> / person</p></div>
+      </div>
+      <div class="card c3">
+        <div class="art"><span>Markets to morsels</span></div>
+        <div class="body"><h3>Half-Day Sydney Foodie</h3><p class="mini">Bakery, fish market, cheese, chocolate and a pie or two. Bring an appetite.</p><p class="from">from <b>A$120</b> / person</p></div>
+      </div>
+      <div class="card c4">
+        <div class="art"><span>Cliffs, caves &amp; campfire</span></div>
+        <div class="body"><h3>Blue Mountains &amp; Jenolan Overnight</h3><p class="mini">A big day in the ranges, a night under canvas, a campfire dinner.</p><p class="from">from <b>A$320</b> / person</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERACTIVE BUILDER -->
+<section class="builder" id="builder">
+  <div class="wrap">
+    <p class="eyebrow">Build your tour</p>
+    <h2 class="builder-title">Plate your own day, see the price grow.</h2>
+    <div class="builder-grid">
+      <div class="controls">
+        <div class="field">
+          <label class="flabel" for="tour">1 · Destination</label>
+          <select id="tour"></select>
+        </div>
+        <div class="field">
+          <span class="flabel">2 · Guests</span>
+          <div class="stepper">
+            <button type="button" id="minus" aria-label="Fewer guests">−</button>
+            <output id="guests">2</output>
+            <button type="button" id="plus" aria-label="More guests">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="flabel">3 · Add extras (per person)</span>
+          <div id="addons" class="addons"></div>
+        </div>
+      </div>
+      <div class="bill">
+        <p class="t">Your day so far</p>
+        <h4 id="billTour">—</h4>
+        <div id="billLines"></div>
+        <div class="total"><span class="mono">Total</span><b id="billTotal">A$0</b></div>
+        <a href="#" class="btn btn-primary" style="margin-top:20px;width:100%;justify-content:center">Send enquiry →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JIMMY -->
+<section class="wrap">
+  <div class="jimmy">
+    <div class="avatar"></div>
+    <div>
+      <p class="eyebrow" style="color:rgba(255,255,255,.75)">Owner-operated</p>
+      <h2>Hi, I'm Jimmy.</h2>
+      <p>Thirty years cooking and guiding, now in smaller vehicles with driver-cooks I've trained myself. Every tour is mine, start to finish — that's the whole point. Wine is my canvas; food is my paint.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <div class="brand" style="color:var(--oat)">Gourmet<span>.</span>Getaway</div>
+      <p style="opacity:.7;margin-top:10px;font-size:14px;max-width:30ch">Food, wine &amp; adventure tours from Sydney, New South Wales.</p>
+    </div>
+    <div><h5>Tours</h5><a href="#">Wednesday Hunter Valley</a><a href="#">Private tours</a><a href="#builder">Build your tour</a></div>
+    <div><h5>Company</h5><a href="#">About Jimmy</a><a href="#">FAQ</a><a href="#">Gift cards</a></div>
+    <div><h5>Get in touch</h5><a href="#">+61 416 139 567</a><a href="#">Instagram</a><a href="#">Facebook</a></div>
+  </div>
+</footer>
+
+<script>
+  // mobile menu
+  const menuBtn = document.getElementById('menuBtn');
+  const navLinks = document.getElementById('navLinks');
+  menuBtn.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open);
+    menuBtn.textContent = open ? 'Close' : 'Menu';
+  });
+
+  // tour data (placeholder prices, per-person)
+  const TOURS = {
+    'blue-mountains-day': { name:'Blue Mountains Day Trip', base:180, min:2, addOns:[
+      {id:'picnic', name:'Gourmet picnic upgrade', price:30},
+      {id:'scenic', name:'Scenic World pass', price:50},
+      {id:'truffle', name:'Truffle hunt (seasonal)', price:65}
+    ]},
+    'hunter-valley': { name:'Hunter Valley, private', base:220, min:2, addOns:[
+      {id:'winery', name:'Extra winery', price:35},
+      {id:'cheese', name:'Cheese & charcuterie board', price:25},
+      {id:'truffle2', name:'Truffle hunt (seasonal)', price:65}
+    ]},
+    'beaches-brewery': { name:'Sydney Beaches & Brewery', base:160, min:2, addOns:[
+      {id:'paddle', name:'Brewery tasting paddle', price:30},
+      {id:'surf', name:'Surf lesson', price:70}
+    ]},
+    'foodie': { name:'Half-Day Sydney Foodie', base:120, min:2, addOns:[
+      {id:'fish', name:'Fish market tasting', price:25},
+      {id:'choc', name:'Chocolate & cheese flight', price:25}
+    ]},
+    'jenolan': { name:'Blue Mountains & Jenolan Overnight', base:320, min:2, addOns:[
+      {id:'cave', name:'Cave tour entry', price:50},
+      {id:'gear', name:'Camp gear & bedding', price:40},
+      {id:'fire', name:'Campfire dinner upgrade', price:35}
+    ]}
+  };
+
+  const tourSel = document.getElementById('tour');
+  const guestsOut = document.getElementById('guests');
+  const addonsEl = document.getElementById('addons');
+  const billTour = document.getElementById('billTour');
+  const billLines = document.getElementById('billLines');
+  const billTotal = document.getElementById('billTotal');
+
+  let current = 'blue-mountains-day';
+  let guests = 2;
+  let selected = {};
+
+  // fill dropdown
+  Object.entries(TOURS).forEach(([id, t]) => {
+    const o = document.createElement('option');
+    o.value = id; o.textContent = t.name;
+    tourSel.appendChild(o);
+  });
+
+  const money = n => 'A$' + n.toLocaleString('en-AU');
+
+  function buildAddons(){
+    addonsEl.innerHTML = '';
+    TOURS[current].addOns.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'addon' + (selected[a.id] ? ' on' : '');
+      row.innerHTML = '<span class="left"><span class="box">' + (selected[a.id] ? '✓' : '') + '</span>' + a.name + '</span><span class="price">+' + money(a.price) + ' pp</span>';
+      row.addEventListener('click', () => {
+        selected[a.id] = !selected[a.id];
+        buildAddons(); render();
+      });
+      addonsEl.appendChild(row);
+    });
+  }
+
+  function render(){
+    const t = TOURS[current];
+    guestsOut.textContent = guests;
+    billTour.textContent = t.name;
+    let lines = '<div class="line"><span>Base · ' + guests + ' guest' + (guests>1?'s':'') + '</span><span>' + money(t.base*guests) + '</span></div>';
+    let total = t.base * guests;
+    t.addOns.forEach(a => {
+      if(selected[a.id]){
+        const sub = a.price * guests;
+        total += sub;
+        lines += '<div class="line add"><span>+ ' + a.name + ' ×' + guests + '</span><span>' + money(sub) + '</span></div>';
+      }
+    });
+    billLines.innerHTML = lines;
+    billTotal.textContent = money(total);
+    billTotal.classList.remove('bill-bump');
+    void billTotal.offsetWidth;
+    billTotal.classList.add('bill-bump');
+  }
+
+  tourSel.addEventListener('change', e => {
+    current = e.target.value;
+    selected = {};
+    if(guests < TOURS[current].min) guests = TOURS[current].min;
+    buildAddons(); render();
+  });
+  document.getElementById('minus').addEventListener('click', () => {
+    if(guests > TOURS[current].min){ guests--; render(); }
+  });
+  document.getElementById('plus').addEventListener('click', () => {
+    if(guests < 16){ guests++; render(); }
+  });
+
+  buildAddons(); render();
+
+  // scroll-reveal for sections
+  const toReveal = document.querySelectorAll('.doors .door, .stacksec .head, .builder .controls, .builder .bill, .jimmy, .foot > div');
+  toReveal.forEach(el => el.classList.add('reveal'));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:.15 });
+  toReveal.forEach(el => io.observe(el));
+
+  // subtle header shadow once scrolled
+  const hdr = document.querySelector('header');
+  window.addEventListener('scroll', () => {
+    hdr.classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive:true });
+</script>
