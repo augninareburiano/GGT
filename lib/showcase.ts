@@ -51,4 +51,47 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     from: "A$320",
     bg: "linear-gradient(150deg,#F4B400,#B5790A)",
   },
+  {
+    id: "highlands",
+    region: "Cool-climate cellar doors",
+    name: "Southern Highlands",
+    blurb: "Rolling green hills, pinot and pie, and a fireside long lunch.",
+    from: "A$210",
+    bg: "linear-gradient(150deg,#8E4585,#3B1E4A)",
+  },
+  {
+    id: "central-coast",
+    region: "Oysters & estuary",
+    name: "Central Coast Oysters",
+    blurb:
+      "Shuck-your-own oysters on the flats, then lunch where the river meets the sea.",
+    from: "A$175",
+    bg: "linear-gradient(150deg,#2E6E9E,#0E3B5C)",
+  },
+  {
+    id: "blue-mountains-day",
+    region: "Clifftops & lookouts",
+    name: "Blue Mountains Day Trip",
+    blurb:
+      "Three Sisters, a bushwalk, and a gourmet picnic on the escarpment.",
+    from: "A$180",
+    bg: "linear-gradient(150deg,#C7522A,#6E2412)",
+  },
+  {
+    id: "orange-mudgee",
+    region: "High-country vines",
+    name: "Orange & Mudgee",
+    blurb: "Altitude wines, orchard produce and a table set among the rows.",
+    from: "A$260",
+    bg: "linear-gradient(150deg,#9E2B45,#4A1020)",
+  },
+  {
+    id: "kangaroo-valley",
+    region: "River, ridge & paddock",
+    name: "Kangaroo Valley",
+    blurb:
+      "Kayaks, cheese, and a slow drive through the greenest valley in the state.",
+    from: "A$195",
+    bg: "linear-gradient(150deg,#3FA796,#155246)",
+  },
 ];
