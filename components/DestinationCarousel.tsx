@@ -178,6 +178,9 @@ export default function DestinationCarousel() {
         />
       ))}
 
+      {/* Bottom scrim keeps the controls legible over bright slides. */}
+      <div className="dc-scrim" aria-hidden />
+
       {/* The morphing clone lives above the background, below the UI. */}
       <div className="dc-clone" ref={cloneRef} aria-hidden />
 
@@ -202,7 +205,7 @@ export default function DestinationCarousel() {
               <button
                 key={`${id}-${k}`}
                 type="button"
-                className="dc-thumb"
+                className={k === 0 ? "dc-thumb dc-thumb-next" : "dc-thumb"}
                 style={{
                   background: slides[id].bg,
                   opacity: id === morphingId ? 0 : 1,
@@ -215,7 +218,9 @@ export default function DestinationCarousel() {
                 aria-label={`Go to ${slides[id].name}`}
               >
                 <span className="dc-cap">{slides[id].name}</span>
-                <span className="dc-price">from {slides[id].from}</span>
+                <span className="dc-price">
+                  <span className="dc-from">from</span> {slides[id].from}
+                </span>
               </button>
             ))}
           </div>
