@@ -38,6 +38,13 @@ export default function DestinationCarousel() {
   const cloneRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  // Mirror of `animating` that `go` can read live — the autoplay timeout closes
+  // over stale state, so the ref is what actually gates re-entry.
+  const animatingRef = useRef(false);
+  const setAnim = (v: boolean) => {
+    animatingRef.current = v;
+    setAnimating(v);
+  };
 
   // Upcoming slides in order; one extra is rendered so it can slide in from the
   // right during the transition (wraps around).
@@ -65,7 +72,7 @@ export default function DestinationCarousel() {
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         if (clone) clone.style.display = "none";
-        setAnimating(false);
+        setAnim(false);
       }),
     );
   };
@@ -79,7 +86,7 @@ export default function DestinationCarousel() {
       return;
     }
 
-    setAnimating(true);
+    setAnim(true);
     const isNext = target === (index + 1) % n;
     const sr = section.getBoundingClientRect();
     const tr = thumb.getBoundingClientRect();
@@ -132,7 +139,7 @@ export default function DestinationCarousel() {
   };
 
   const go = (target: number) => {
-    if (target === index || animating) return;
+    if (target === index || animatingRef.current) return;
     if (prefersReduced() || !thumbRefs.current[target]) {
       setIndex(target); // fallback: plain cross-fade of the bg layers
       return;
@@ -235,7 +242,7 @@ export default function DestinationCarousel() {
               />
             </span>
             <span className="dc-clock">
-              {fmt(elapsed)} / {fmt(SLIDE_SEC)}
+              {fmt(Math.min(elapsed, SLIDE_SEC))} / {fmt(SLIDE_SEC)}
             </span>
           </div>
 
