@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import DestinationCarousel from "@/components/DestinationCarousel";
 import TwoDoors from "@/components/TwoDoors";
 import StackingCards from "@/components/StackingCards";
 import TourBuilder from "@/components/TourBuilder";
@@ -17,6 +18,7 @@ export default async function Home() {
     <>
       <Header />
       <Hero />
+      <DestinationCarousel />
       <TwoDoors />
       <StackingCards />
       <TourBuilder tours={tours} />

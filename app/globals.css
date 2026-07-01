@@ -148,6 +148,55 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .foot a:hover{opacity:1;color:var(--marmalade)}
 .foot h5{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:var(--stone)}
 
+/* destination carousel */
+.dc{position:relative;height:min(88vh,720px);min-height:520px;overflow:hidden;background:var(--ink);color:#fff}
+.dc-bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .8s ease}
+.dc-bg-layer::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,16,22,.7),rgba(20,16,22,.2) 45%,rgba(20,16,22,.45))}
+.dc-clone{position:absolute;display:none;z-index:3;overflow:hidden;background-size:cover;background-position:center;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);will-change:width,height,top,left}
+.dc-inner{position:relative;z-index:4;height:100%;display:flex;flex-direction:column;justify-content:center}
+
+.dc-copy{max-width:46ch;animation:fadeUp .6s ease both}
+.dc-region{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.dc-title{font-size:clamp(46px,8vw,108px);line-height:.9;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.35)}
+.dc-blurb{max-width:34ch;margin:18px 0 26px;font-size:15px;color:rgba(255,255,255,.9)}
+
+.dc-thumbs{position:absolute;right:28px;top:50%;transform:translateY(-50%);display:flex;gap:16px}
+.dc-thumb{position:relative;width:150px;height:210px;flex:none;border:none;padding:0;border-radius:16px;overflow:hidden;cursor:pointer;background-size:cover;background-position:center;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease}
+.dc-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.55))}
+.dc-thumb:hover{transform:translateY(-8px);box-shadow:0 30px 54px -20px rgba(0,0,0,.7)}
+.dc-cap{position:absolute;left:14px;bottom:14px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+
+.dc-controls{position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.dc-time{display:flex;align-items:center;gap:14px}
+.dc-play{width:42px;height:42px;border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.dc-play:hover{background:rgba(255,255,255,.2)}
+.dc-progress{position:relative;width:120px;height:3px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden}
+.dc-fill{position:absolute;inset:0;transform-origin:left;background:var(--marmalade);animation-name:dcgrow;animation-timing-function:linear;animation-fill-mode:forwards}
+@keyframes dcgrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.dc-clock{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.06em;color:rgba(255,255,255,.85)}
+.dc-nav{display:flex;gap:12px}
+.dc-nav button{width:46px;height:46px;border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s ease,opacity .15s ease}
+.dc-nav button:hover{background:rgba(255,255,255,.2)}
+.dc-nav button:disabled{opacity:.4;cursor:default}
+.dc-index{display:flex;align-items:baseline;gap:6px;font-family:var(--font-mono),'IBM Plex Mono',monospace}
+.dc-index b{font-size:40px;letter-spacing:-.02em}
+.dc-index span{font-size:14px;color:rgba(255,255,255,.7)}
+
+@media(max-width:900px){
+  .dc-thumbs{display:none}
+  .dc{height:74vh;min-height:460px}
+}
+@media(max-width:560px){
+  .dc-clock{display:none}
+  .dc-controls{bottom:22px}
+}
+@media(prefers-reduced-motion:reduce){
+  .dc-bg-layer{transition:none}
+  .dc-copy{animation:none}
+  .dc-thumb:hover{transform:none}
+  .dc-fill{animation:none;transform:scaleX(1)}
+}
+
 /* animations */
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
