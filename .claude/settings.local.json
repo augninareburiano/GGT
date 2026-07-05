@@ -7,7 +7,11 @@
       "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalPort,OwningProcess\")",
       "PowerShell(Set-Location \"c:\\\\Users\\\\rebur\\\\OneDrive\\\\Documents\\\\Gourmet Getaway Tours\"; $s=\\(Get-ChildItem .next -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum\\).Sum; Write-Output \\(\".next size: {0} MB\" -f [math]::Round\\($s/1MB\\)\\); $nm=\\(Get-ChildItem node_modules -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum\\).Sum; Write-Output \\(\"node_modules size: {0} MB\" -f [math]::Round\\($nm/1MB\\)\\); Write-Output \\(\"node_modules attributes: \" + \\(Get-Item node_modules\\).Attributes\\); Write-Output \\(\"project path under OneDrive: \" + $env:OneDrive\\))",
       "Bash(git check-ignore *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(python -c \"import json; json.load\\(open\\('.claude/settings.local.json'\\)\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.claude/settings.local.json','utf8'\\)\\)\")"
     ]
   }
 }
