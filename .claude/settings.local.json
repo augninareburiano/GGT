@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(npm install)"
+      "PowerShell(npm install)",
+      "Bash(timeout 90 npx next dev)",
+      "Bash(powershell -Command 'Get-Process node -ErrorAction SilentlyContinue | Select-Object Id,CPU,@{N='\\\\''MB'\\\\'';E={[math]::Round\\($_.WorkingSet64/1MB\\)}},StartTime | Format-Table -Auto')",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalPort,OwningProcess\")",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\rebur\\\\OneDrive\\\\Documents\\\\Gourmet Getaway Tours\"; $s=\\(Get-ChildItem .next -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum\\).Sum; Write-Output \\(\".next size: {0} MB\" -f [math]::Round\\($s/1MB\\)\\); $nm=\\(Get-ChildItem node_modules -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum\\).Sum; Write-Output \\(\"node_modules size: {0} MB\" -f [math]::Round\\($nm/1MB\\)\\); Write-Output \\(\"node_modules attributes: \" + \\(Get-Item node_modules\\).Attributes\\); Write-Output \\(\"project path under OneDrive: \" + $env:OneDrive\\))",
+      "Bash(git check-ignore *)",
+      "Bash(npm run *)"
     ]
   }
 }
