@@ -190,7 +190,17 @@ export default function DestinationCarousel() {
           <h2 className="dc-title">{slide.name}</h2>
           <p className="dc-blurb">{slide.blurb}</p>
           <div className="dc-cta">
-            <a href="#builder" className="btn btn-primary">
+            <a
+              href="#builder"
+              className="btn btn-primary"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("ggt:prefill-tour", {
+                    detail: { id: slide.id, name: slide.name },
+                  }),
+                )
+              }
+            >
               Build your tour →
             </a>
             <a href="#destinations" className="btn btn-light">

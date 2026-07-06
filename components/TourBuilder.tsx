@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { money } from "@/lib/money";
 import type { Tour } from "@/lib/tours";
 import { useReveal } from "./useReveal";
@@ -29,6 +29,23 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     setSelected({});
     setGuests((g) => (g < next.min ? next.min : g));
   }
+
+  // Preselect a tour when another section (e.g. the destination carousel) asks
+  // the builder to prefill. Match on id first, then name — the carousel and
+  // builder datasets use different ids but share tour names.
+  useEffect(() => {
+    function onPrefill(e: Event) {
+      const detail = (e as CustomEvent<{ id?: string; name?: string }>).detail;
+      const match = tours.find(
+        (t) => t.id === detail?.id || t.name === detail?.name,
+      );
+      if (match) changeTour(match.id);
+    }
+    window.addEventListener("ggt:prefill-tour", onPrefill as EventListener);
+    return () =>
+      window.removeEventListener("ggt:prefill-tour", onPrefill as EventListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tours]);
 
   function toggleAddon(id: string) {
     setSelected((s) => ({ ...s, [id]: !s[id] }));
