@@ -166,9 +166,12 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .dc-blurb{max-width:34ch;margin:18px 0 26px;font-size:15px;line-height:1.55;color:rgba(255,255,255,.78)}
 .dc-cta{display:flex;gap:12px;flex-wrap:wrap}
 
-.dc-thumbs{position:absolute;right:28px;top:50%;transform:translateY(-50%);width:470px;height:250px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
-.dc-track{display:flex;align-items:center;gap:16px;height:100%;will-change:transform}
-.dc-thumb{position:relative;width:150px;height:210px;flex:none;border:none;padding:0;border-radius:16px;overflow:hidden;cursor:pointer;background-size:cover;background-position:center;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease, opacity .2s ease}
+/* Vertical padding gives the cards' box-shadows room inside the clip box, so
+   overflow:hidden (needed to clip the horizontal slide) no longer slices the
+   shadows off with a hard edge. pointer-events keep the padded area click-through. */
+.dc-thumbs{position:absolute;right:28px;top:50%;transform:translateY(-50%);width:470px;padding:64px 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
+.dc-track{display:flex;align-items:center;gap:16px;height:auto;will-change:transform}
+.dc-thumb{position:relative;width:150px;height:210px;flex:none;border:none;padding:0;border-radius:16px;overflow:hidden;cursor:pointer;pointer-events:auto;background-size:cover;background-position:center;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease, opacity .2s ease}
 .dc-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.6))}
 .dc-thumb:hover{transform:translateY(-8px);box-shadow:0 30px 54px -20px rgba(0,0,0,.7)}
 /* the "up next" card sits slightly forward of the queued ones */
