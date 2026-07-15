@@ -12,7 +12,9 @@
       "Bash(git add *)",
       "Bash(python -c \"import json; json.load\\(open\\('.claude/settings.local.json'\\)\\)\")",
       "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.claude/settings.local.json','utf8'\\)\\)\")",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(rm -rf .next)"
     ]
   }
 }

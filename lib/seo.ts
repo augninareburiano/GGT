@@ -12,6 +12,28 @@ export const SITE_DESCRIPTION =
 export const BUSINESS_PHONE = "+61416139567";
 
 /**
+ * Social profiles — single source of truth for the footer, the "follow" band
+ * and the Organization `sameAs` structured data.
+ */
+export const SOCIAL_LINKS = [
+  {
+    name: "Instagram",
+    url: "https://www.instagram.com/gourmetgetawaytours/",
+    cta: "Follow on Instagram",
+  },
+  {
+    name: "Facebook",
+    url: "https://www.facebook.com/GourmetGetawayTours/",
+    cta: "Like on Facebook",
+  },
+  {
+    name: "YouTube",
+    url: "https://www.youtube.com/channel/UCdEIGgqZqPOtDQXrR5AaG3w",
+    cta: "Watch on YouTube",
+  },
+] as const;
+
+/**
  * JSON-LD describing the business itself. TravelAgency is a subtype of
  * LocalBusiness, so it carries name/description/telephone plus travel context.
  */
@@ -26,11 +48,7 @@ export function organizationJsonLd() {
     image: `${SITE_URL}/opengraph-image`,
     telephone: BUSINESS_PHONE,
     priceRange: "$$",
-    sameAs: [
-      "https://www.facebook.com/GourmetGetawayTours/",
-      "https://www.instagram.com/gourmetgetawaytours/",
-      "https://www.youtube.com/channel/UCdEIGgqZqPOtDQXrR5AaG3w",
-    ],
+    sameAs: SOCIAL_LINKS.map((s) => s.url),
     areaServed: {
       "@type": "State",
       name: "New South Wales",
