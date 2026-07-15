@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { money } from "@/lib/money";
+import { trackEnquiryConversion } from "@/lib/analytics";
 
 export type EnquiryDraft = {
   tourId: string;
@@ -52,6 +53,8 @@ export default function EnquiryModal({
         throw new Error(data.error ?? "Something went wrong. Please try again.");
       }
       setStatus("ok");
+      // Report the completed enquiry as an ad conversion (no-op if untracked).
+      trackEnquiryConversion(draft.total);
     } catch (err) {
       setStatus("err");
       setError(err instanceof Error ? err.message : "Something went wrong.");

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import Analytics from "@/components/Analytics";
 
 const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -23,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={plexMono.variable}>{children}</body>
+      <Analytics />
     </html>
   );
 }
