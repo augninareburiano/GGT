@@ -5,6 +5,7 @@ import { money } from "@/lib/money";
 import type { Tour } from "@/lib/tours";
 import { useReveal } from "./useReveal";
 import EnquiryModal, { type EnquiryDraft } from "./EnquiryModal";
+import CheckoutModal, { type CheckoutDraft } from "./CheckoutModal";
 
 const MAX_GUESTS = 16;
 
@@ -16,6 +17,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
   const [guests, setGuests] = useState(tours[0]?.min ?? 2);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [modalOpen, setModalOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const current = useMemo(
     () => tours.find((t) => t.id === currentId) ?? tours[0],
@@ -64,6 +66,14 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     guests,
     addOns: selectedAddOns.map((a) => ({ id: a.id, name: a.name, price: a.price })),
     total,
+  };
+
+  const checkoutDraft: CheckoutDraft = {
+    tourId: current.id,
+    tourName: current.name,
+    guests,
+    addOnIds: selectedAddOns.map((a) => a.id),
+    totalAud: total,
   };
 
   return (
@@ -168,9 +178,17 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
               type="button"
               className="btn btn-primary"
               style={{ marginTop: 20, width: "100%", justifyContent: "center" }}
+              onClick={() => setCheckoutOpen(true)}
+            >
+              Book &amp; pay →
+            </button>
+            <button
+              type="button"
+              className="btn"
+              style={{ marginTop: 10, width: "100%", justifyContent: "center" }}
               onClick={() => setModalOpen(true)}
             >
-              Send enquiry →
+              Just enquire
             </button>
           </div>
         </div>
@@ -178,6 +196,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
 
       {modalOpen && (
         <EnquiryModal draft={draft} onClose={() => setModalOpen(false)} />
+      )}
+      {checkoutOpen && (
+        <CheckoutModal draft={checkoutDraft} onClose={() => setCheckoutOpen(false)} />
       )}
     </section>
   );

@@ -256,6 +256,12 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 .form-msg{padding:12px 14px;border-radius:12px;font-size:14px;margin-bottom:16px}
 .form-msg.ok{background:rgba(95,115,33,.12);color:var(--olive-deep)}
 .form-msg.err{background:rgba(255,94,26,.12);color:#b5300a}
+.modal .summary .row.muted{font-size:12px}
+.pay-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pay-toggle button{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:12px 14px;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;background:#fff;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:600;color:var(--ink);transition:border-color .15s,background .15s}
+.pay-toggle button small{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;font-weight:400;color:var(--stone)}
+.pay-toggle button.on{border-color:var(--marmalade);background:rgba(255,94,26,.06)}
+.pay-toggle button.on small{color:var(--marmalade)}
 
 /* --- admin (new) --- */
 .admin{min-height:100vh;background:var(--paper);padding:40px 0}
