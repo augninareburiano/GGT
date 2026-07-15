@@ -37,8 +37,6 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     bg: "linear-gradient(150deg,#8FB31E,#3C4A14)",
     // Drop a photo at public/images/tours/hunter.jpg and uncomment:
     // image: "/images/tours/hunter.jpg",
-    image: "/images/tours/hunter.svg", // TEMP demo — delete this line to revert
-
   },
   {
     id: "beaches",
