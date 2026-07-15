@@ -1,10 +1,15 @@
+import { mediaBg } from "./media";
+
 /**
  * The "Nine ways to spend the day" showcase tours.
  *
  * Single source of truth shared by the StackingCards section and the
  * DestinationCarousel thumbnails, so both always show the same tours.
- * Each `bg` is a CSS background value — swap in `url("/photo.jpg") center/cover`
- * for real photography with no other changes.
+ *
+ * `bg` is the CSS gradient fallback. To use real photography, set `image` to a
+ * path (e.g. `/images/tours/hunter.jpg`) — the photo layers over the gradient,
+ * which stays behind as a fallback while the image loads or if it's missing.
+ * Consume both together via `showcaseBg(tour)` rather than reading `bg` raw.
  */
 export type ShowcaseTour = {
   id: string;
@@ -13,8 +18,14 @@ export type ShowcaseTour = {
   name: string;
   blurb: string;
   from: string;
+  /** CSS gradient fallback, shown behind any photo. */
   bg: string;
+  /** Optional photo path/URL, e.g. `/images/tours/hunter.jpg`. */
+  image?: string;
 };
+
+/** Effective CSS background for a showcase tour: photo over gradient fallback. */
+export const showcaseBg = (t: ShowcaseTour): string => mediaBg(t.bg, t.image);
 
 export const SHOWCASE_TOURS: ShowcaseTour[] = [
   {
@@ -24,6 +35,10 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     blurb: "Cellar doors, long lunch, and a chef who cooks to match every glass.",
     from: "A$220",
     bg: "linear-gradient(150deg,#8FB31E,#3C4A14)",
+    // Drop a photo at public/images/tours/hunter.jpg and uncomment:
+    // image: "/images/tours/hunter.jpg",
+    image: "/images/tours/hunter.svg", // TEMP demo — delete this line to revert
+
   },
   {
     id: "beaches",

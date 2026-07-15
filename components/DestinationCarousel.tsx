@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SHOWCASE_TOURS } from "@/lib/showcase";
+import { SHOWCASE_TOURS, showcaseBg } from "@/lib/showcase";
 
 /**
  * A "Globe Express"–style destination carousel that doubles as the landing hero.
@@ -93,7 +93,7 @@ export default function DestinationCarousel() {
 
     // 1) Morph the thumbnail out to fill the background.
     clone.style.transition = "none";
-    clone.style.background = slides[target].bg;
+    clone.style.background = showcaseBg(slides[target]);
     clone.style.backgroundSize = "cover";
     clone.style.backgroundPosition = "center";
     clone.style.left = `${tr.left - sr.left}px`;
@@ -174,7 +174,7 @@ export default function DestinationCarousel() {
         <div
           key={i}
           className="dc-bg-layer"
-          style={{ background: s.bg, opacity: i === index ? 1 : 0 }}
+          style={{ background: showcaseBg(s), opacity: i === index ? 1 : 0 }}
         />
       ))}
 
@@ -207,7 +207,7 @@ export default function DestinationCarousel() {
                 type="button"
                 className={k === 0 ? "dc-thumb dc-thumb-next" : "dc-thumb"}
                 style={{
-                  background: slides[id].bg,
+                  background: showcaseBg(slides[id]),
                   opacity: id === morphingId ? 0 : 1,
                 }}
                 ref={(el) => {

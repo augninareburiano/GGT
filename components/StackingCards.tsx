@@ -1,7 +1,7 @@
 "use client";
 
 import { useReveal } from "./useReveal";
-import { SHOWCASE_TOURS } from "@/lib/showcase";
+import { SHOWCASE_TOURS, showcaseBg } from "@/lib/showcase";
 
 export default function StackingCards() {
   const head = useReveal<HTMLDivElement>("head");
@@ -21,7 +21,7 @@ export default function StackingCards() {
         <div className="cards">
           {SHOWCASE_TOURS.map((c) => (
             <div className="card" key={c.id}>
-              <div className="art" style={{ background: c.bg }}>
+              <div className="art" style={{ background: showcaseBg(c) }}>
                 <span>{c.region}</span>
               </div>
               <div className="body">
