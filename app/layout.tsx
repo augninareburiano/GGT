@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, organizationJsonLd } from "@/lib/seo";
 
 const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -9,10 +10,31 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const TITLE = "Gourmet Getaway Tours — food, wine & adventure tours from Sydney";
+
 export const metadata: Metadata = {
-  title: "Gourmet Getaway Tours — food, wine & adventure tours from Sydney",
-  description:
-    "Owner-operated food, wine and adventure tours across New South Wales. Pick the place, set your group, choose your extras — and watch the price add up as you go.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    title: TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "en_AU",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
@@ -22,7 +44,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={plexMono.variable}>{children}</body>
+      <body className={plexMono.variable}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd()),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

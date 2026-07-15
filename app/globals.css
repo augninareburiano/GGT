@@ -275,3 +275,16 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 .tour-edit{display:grid;grid-template-columns:1fr 90px 70px;gap:10px;align-items:center;margin-bottom:8px}
 .tour-edit input{padding:10px 12px;font-family:var(--font);font-size:14px;border:1.5px solid rgba(33,28,36,.2);border-radius:10px}
 .muted{color:var(--stone);font-size:14px}
+
+/* --- testimonials (new) --- */
+.tmns{padding:20px 0 84px}
+.tmns-title{font-size:clamp(28px,4.2vw,46px);max-width:20ch;margin:6px 0 30px}
+.tmns-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.tmn{background:#fff;border:1.5px solid rgba(33,28,36,.12);border-radius:var(--radius);padding:28px;display:flex;flex-direction:column;gap:12px}
+.tmn-title{font-size:20px}
+.tmn-stars{color:var(--gold);font-size:16px;letter-spacing:2px;line-height:1}
+.tmn blockquote{font-size:15px;line-height:1.55;color:#43403b;margin-top:2px}
+.tmn figcaption{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+.tmn-author{font-weight:bold;font-size:15px}
+.tmn-source{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.06em;color:var(--olive)}
+@media(max-width:680px){.tmns-grid{grid-template-columns:1fr}}
