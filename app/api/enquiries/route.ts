@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb, verifyAdmin } from "@/lib/firebase.admin";
-import { money } from "@/lib/money";
+import { sendEnquiryAck, sendEnquiryNotification } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -22,9 +22,12 @@ const enquirySchema = z.object({
   guests: z.number().int().min(1).max(100),
   addOns: z.array(addOnSchema).default([]),
   total: z.number().nonnegative(),
+  // Guest's preferred tour date, "YYYY-MM-DD". The booking is only firmed up
+  // (and this becomes tourDate) once an admin confirms it.
+  preferredDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date."),
 });
 
-/** POST — public: validate, save the enquiry, and email the business. */
+/** POST — public: validate, save the enquiry, notify the business, ack the guest. */
 export async function POST(req: Request) {
   let body: unknown;
   try {
@@ -48,10 +51,20 @@ export async function POST(req: Request) {
       .add({
         ...data,
         status: "new",
+        tourDate: null,
         createdAt: FieldValue.serverTimestamp(),
+        confirmedAt: null,
+        ackSentAt: null,
+        confirmationSentAt: null,
+        reminderSentAt: null,
+        reviewSentAt: null,
       });
 
-    await sendNotification(data, ref.id);
+    await Promise.all([
+      sendEnquiryNotification(data, ref.id),
+      sendEnquiryAck(data),
+    ]);
+    await ref.update({ ackSentAt: FieldValue.serverTimestamp() });
 
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (err) {
@@ -88,55 +101,12 @@ export async function GET(req: Request) {
       guests: v.guests,
       addOns: v.addOns ?? [],
       total: v.total,
+      preferredDate: v.preferredDate ?? null,
+      tourDate: v.tourDate ?? null,
       status: v.status ?? "new",
       createdAt: v.createdAt?.toDate?.()?.toISOString() ?? null,
     };
   });
 
   return NextResponse.json({ enquiries });
-}
-
-type EnquiryData = z.infer<typeof enquirySchema>;
-
-/** Sends a notification email via Resend, if configured. Non-fatal on failure. */
-async function sendNotification(data: EnquiryData, id: string) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.ENQUIRY_TO_EMAIL;
-  const from = process.env.ENQUIRY_FROM_EMAIL;
-  if (!apiKey || !to || !from) {
-    console.warn("Email not sent: RESEND_API_KEY / ENQUIRY_* env vars missing.");
-    return;
-  }
-
-  try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(apiKey);
-    const addOnsLine = data.addOns.length
-      ? data.addOns.map((a) => a.name).join(", ")
-      : "—";
-
-    await resend.emails.send({
-      from,
-      to,
-      replyTo: data.email,
-      subject: `New tour enquiry — ${data.tourName} (${data.name})`,
-      text: [
-        `New enquiry #${id}`,
-        ``,
-        `Tour: ${data.tourName}`,
-        `Guests: ${data.guests}`,
-        `Add-ons: ${addOnsLine}`,
-        `Estimated total: ${money(data.total)}`,
-        ``,
-        `Name: ${data.name}`,
-        `Email: ${data.email}`,
-        `Phone: ${data.phone || "—"}`,
-        ``,
-        `Message:`,
-        data.message || "—",
-      ].join("\n"),
-    });
-  } catch (err) {
-    console.error("Email notification failed (enquiry still saved):", err);
-  }
 }
