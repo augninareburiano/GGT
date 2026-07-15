@@ -25,11 +25,16 @@ export default function Header() {
           className="menu-btn"
           aria-label="Menu"
           aria-expanded={open}
+          aria-controls="primary-nav"
           onClick={() => setOpen((o) => !o)}
         >
           {open ? "Close" : "Menu"}
         </button>
-        <nav className={open ? "nav-links open" : "nav-links"}>
+        <nav
+          id="primary-nav"
+          aria-label="Primary"
+          className={open ? "nav-links open" : "nav-links"}
+        >
           <a href="#" onClick={closeMenu}>
             Wednesday Tour
           </a>

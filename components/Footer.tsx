@@ -40,9 +40,14 @@ export default function Footer() {
         </div>
         <div ref={c4.ref} className={c4.className}>
           <h5>Get in touch</h5>
-          <a href="#">+61 416 139 567</a>
-          <a href="#">Instagram</a>
-          <a href="#">Facebook</a>
+          <a href="mailto:info@gourmetgetaway.com.au">info@gourmetgetaway.com.au</a>
+          <a href="tel:+61416139567">+61 416 139 567</a>
+          <a href="https://instagram.com/" rel="noopener noreferrer" target="_blank">
+            Instagram
+          </a>
+          <a href="https://facebook.com/" rel="noopener noreferrer" target="_blank">
+            Facebook
+          </a>
         </div>
       </div>
     </footer>

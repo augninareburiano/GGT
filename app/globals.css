@@ -272,3 +272,24 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 .tour-edit{display:grid;grid-template-columns:1fr 90px 70px;gap:10px;align-items:center;margin-bottom:8px}
 .tour-edit input{padding:10px 12px;font-family:var(--font);font-size:14px;border:1.5px solid rgba(33,28,36,.2);border-radius:10px}
 .muted{color:var(--stone);font-size:14px}
+
+/* --- accessibility & anti-spam (new) --- */
+
+/* Skip link: off-screen until focused, then pinned top-left. */
+.skip-link{position:absolute;left:-9999px;top:0;z-index:1000;background:var(--ink,#211c24);color:#fff;padding:12px 18px;border-radius:0 0 10px 0;font-size:14px}
+.skip-link:focus{left:0}
+
+/* Give the main landmark a focus target without a visible outline box. */
+main:focus{outline:none}
+
+/* Honeypot field: hidden from sighted users and assistive tech, but present
+   in the DOM so bots that fill everything reveal themselves. */
+.hp-field{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:-1px}
+
+/* Add-on rows are real <label>s wrapping a visually-hidden checkbox so they are
+   keyboard-operable and announced by screen readers. */
+.addon-input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.addon:focus-within{outline:3px solid var(--marmalade);outline-offset:2px}
+
+/* Screen-reader-only utility. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
