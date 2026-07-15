@@ -102,7 +102,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                 >
                   −
                 </button>
-                <output>{guests}</output>
+                <output aria-live="polite" aria-label={`${guests} guests`}>
+                  {guests}
+                </output>
                 <button
                   type="button"
                   aria-label="More guests"
@@ -121,17 +123,21 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                 {current.addOns.map((a) => {
                   const on = !!selected[a.id];
                   return (
-                    <div
-                      key={a.id}
-                      className={on ? "addon on" : "addon"}
-                      onClick={() => toggleAddon(a.id)}
-                    >
+                    <label key={a.id} className={on ? "addon on" : "addon"}>
+                      <input
+                        type="checkbox"
+                        className="addon-input"
+                        checked={on}
+                        onChange={() => toggleAddon(a.id)}
+                      />
                       <span className="left">
-                        <span className="box">{on ? "✓" : ""}</span>
+                        <span className="box" aria-hidden="true">
+                          {on ? "✓" : ""}
+                        </span>
                         {a.name}
                       </span>
                       <span className="price">+{money(a.price)} pp</span>
-                    </div>
+                    </label>
                   );
                 })}
               </div>
@@ -157,7 +163,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                 </div>
               ))}
             </div>
-            <div className="total">
+            <div className="total" aria-live="polite" aria-atomic="true">
               <span className="mono">Total</span>
               {/* key changes on total → remount re-runs the bump animation */}
               <b key={total} className="bill-bump">

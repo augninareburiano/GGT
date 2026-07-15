@@ -15,10 +15,12 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <DestinationCarousel />
-      <TwoDoors />
-      <TourBuilder tours={tours} />
-      <JimmyStrip />
+      <main id="main" tabIndex={-1}>
+        <DestinationCarousel />
+        <TwoDoors />
+        <TourBuilder tours={tours} />
+        <JimmyStrip />
+      </main>
       <Footer />
     </>
   );
