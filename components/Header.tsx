@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Header() {
@@ -33,9 +34,9 @@ export default function Header() {
           <a href="#" onClick={closeMenu}>
             Wednesday Tour
           </a>
-          <a href="#" onClick={closeMenu}>
+          <Link href="/tours" onClick={closeMenu}>
             Private Tours
-          </a>
+          </Link>
           <a href="#" onClick={closeMenu}>
             About
           </a>

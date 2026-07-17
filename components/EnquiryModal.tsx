@@ -88,9 +88,11 @@ export default function EnquiryModal({
             <div className="summary">
               <div className="row">
                 <span>{draft.tourName}</span>
-                <span>
-                  {draft.guests} guest{draft.guests > 1 ? "s" : ""}
-                </span>
+                {draft.total > 0 && (
+                  <span>
+                    {draft.guests} guest{draft.guests > 1 ? "s" : ""}
+                  </span>
+                )}
               </div>
               {draft.addOns.map((a) => (
                 <div className="row" key={a.id}>
@@ -98,10 +100,12 @@ export default function EnquiryModal({
                   <span>{money(a.price * draft.guests)}</span>
                 </div>
               ))}
-              <div className="row">
-                <b>Estimated total</b>
-                <b>{money(draft.total)}</b>
-              </div>
+              {draft.total > 0 && (
+                <div className="row">
+                  <b>Estimated total</b>
+                  <b>{money(draft.total)}</b>
+                </div>
+              )}
             </div>
 
             {status === "err" && (
