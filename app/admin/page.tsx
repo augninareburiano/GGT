@@ -87,6 +87,20 @@ export default function AdminPage() {
     );
   }
 
+  async function deleteEnquiry(id: string) {
+    if (!confirm("Delete this enquiry? This cannot be undone.")) return;
+    const headers = await authHeader();
+    const res = await fetch(`/api/enquiries/${id}`, {
+      method: "DELETE",
+      headers,
+    });
+    if (!res.ok) {
+      alert("Failed to delete enquiry.");
+      return;
+    }
+    setEnquiries((list) => list.filter((e) => e.id !== id));
+  }
+
   async function saveTour(tour: Tour) {
     const headers = { ...(await authHeader()), "Content-Type": "application/json" };
     const res = await fetch("/api/tours", {
@@ -169,7 +183,7 @@ export default function AdminPage() {
                 “{e.message}”
               </p>
             )}
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
               {e.status === "new" ? (
                 <button
                   className="btn btn-ghost"
@@ -185,6 +199,12 @@ export default function AdminPage() {
                   Reopen
                 </button>
               )}
+              <button
+                className="btn btn-ghost"
+                onClick={() => deleteEnquiry(e.id)}
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}

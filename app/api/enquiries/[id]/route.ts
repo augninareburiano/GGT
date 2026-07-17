@@ -30,3 +30,19 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
+
+/** DELETE — admin only: remove an enquiry. */
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const admin = await verifyAdmin(req.headers.get("authorization"));
+  if (!admin) {
+    return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await adminDb().collection("enquiries").doc(id).delete();
+
+  return NextResponse.json({ ok: true });
+}
