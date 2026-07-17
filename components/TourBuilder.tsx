@@ -47,6 +47,14 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tours]);
 
+  // Deep link: a detail page CTA lands on /?tour=<id>#builder to open the
+  // builder with that tour already chosen.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("tour");
+    if (wanted && tours.some((t) => t.id === wanted)) changeTour(wanted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tours]);
+
   function toggleAddon(id: string) {
     setSelected((s) => ({ ...s, [id]: !s[id] }));
   }

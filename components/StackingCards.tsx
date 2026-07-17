@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useReveal } from "./useReveal";
 import { SHOWCASE_TOURS } from "@/lib/showcase";
 
@@ -14,9 +15,9 @@ export default function StackingCards() {
             <p className="eyebrow">Pick a starting point</p>
             <h2>Nine ways to spend the day.</h2>
           </div>
-          <a href="#" className="btn btn-light">
+          <Link href="/tours" className="btn btn-light">
             See all tours
-          </a>
+          </Link>
         </div>
         <div className="cards">
           {SHOWCASE_TOURS.map((c) => (

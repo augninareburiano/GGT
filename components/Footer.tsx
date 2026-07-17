@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useReveal } from "./useReveal";
 import { SOCIAL_LINKS } from "@/lib/seo";
 
@@ -30,7 +31,7 @@ export default function Footer() {
         <div ref={c2.ref} className={c2.className}>
           <h5>Tours</h5>
           <a href="#">Wednesday Hunter Valley</a>
-          <a href="#">Private tours</a>
+          <Link href="/tours">Private tours</Link>
           <a href="#builder">Build your tour</a>
         </div>
         <div ref={c3.ref} className={c3.className}>
