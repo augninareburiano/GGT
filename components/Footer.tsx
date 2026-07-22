@@ -1,6 +1,7 @@
 "use client";
 
 import { useReveal } from "./useReveal";
+import CurrencyPicker from "./CurrencyPicker";
 import { SOCIAL_LINKS } from "@/lib/seo";
 import {
   bookingHref,
@@ -53,6 +54,7 @@ export default function Footer() {
               {s.name}
             </a>
           ))}
+          <CurrencyPicker />
         </div>
       </div>
     </footer>
