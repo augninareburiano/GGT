@@ -3,8 +3,7 @@ import { mediaBg } from "./media";
 /**
  * The "Nine ways to spend the day" showcase tours.
  *
- * Single source of truth shared by the StackingCards section and the
- * DestinationCarousel thumbnails, so both always show the same tours.
+ * Single source of truth behind the DestinationCarousel thumbnails.
  *
  * `bg` is the CSS gradient fallback. To use real photography, set `image` to a
  * path (e.g. `/images/tours/hunter.jpg`) — the photo layers over the gradient,
