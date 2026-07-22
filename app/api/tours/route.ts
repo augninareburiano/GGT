@@ -9,7 +9,10 @@ export const runtime = "nodejs";
 const addOnSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
+  /** On a pay-on-the-day extra this is a guide price; 0 means it varies. */
   price: z.number().nonnegative(),
+  /** Third-party cost the guest settles on the day — kept out of every total. */
+  payOnDay: z.boolean().default(false),
 });
 
 const tourSchema = z.object({
