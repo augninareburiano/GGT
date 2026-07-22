@@ -135,6 +135,9 @@ select{width:100%;padding:14px 16px;font-family:var(--font);font-size:16px;borde
 .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px}
 .total .mono{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
 .total b{font-size:32px;color:var(--marmalade)}
+/* Height is reserved even when empty so the bill doesn't reflow when converted
+   prices replace AUD after hydration. */
+.bill-charged{display:block;text-align:right;min-height:17px;margin-top:2px;font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;opacity:.75}
 @media(max-width:780px){.builder-grid{grid-template-columns:1fr}.bill{position:relative;top:0}}
 
 /* brand motto */
@@ -174,6 +177,14 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .foot a:hover{opacity:1;color:var(--marmalade)}
 .foot h5{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:var(--stone)}
 
+/* currency picker */
+.cpick{margin-top:18px;max-width:240px}
+.cpick-label{display:block;font-family:var(--font-mono),'IBM Plex Mono';font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-bottom:6px}
+.cpick select{width:100%;background:rgba(255,255,255,.06);color:var(--oat);border:1px solid rgba(243,236,216,.28);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;cursor:pointer}
+.cpick select:focus-visible{outline:2px solid var(--marmalade);outline-offset:2px}
+.cpick select option{color:var(--ink)}
+.cpick-note{margin-top:8px;font-size:12px;line-height:1.45;opacity:.62}
+
 /* destination carousel */
 .dc{position:relative;height:calc(100vh - 70px);min-height:560px;overflow:hidden;background:var(--ink);color:#fff}
 .dc-bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .8s ease}
@@ -206,7 +217,10 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 /* card tier 1 — the tour name, brightest element on the card */
 .dc-cap{position:absolute;left:14px;bottom:34px;right:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:13px;font-weight:500;line-height:1.25;letter-spacing:.03em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
 /* card tier 2 — the price, with a de-emphasised "from" */
-.dc-price{position:absolute;left:14px;bottom:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:14px;font-weight:bold;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+/* nowrap: yen and peso figures are the longest of the supported currencies —
+   they fit the 150px thumb, but must never wrap onto a second line if a rate
+   moves or a tour price rises. */
+.dc-price{position:absolute;left:14px;bottom:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:14px;font-weight:bold;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7);white-space:nowrap}
 .dc-from{font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6)}
 
 .dc-controls{position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -277,6 +291,7 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 .modal textarea{resize:vertical;min-height:80px}
 .modal .summary{background:var(--oat);border-radius:12px;padding:14px 16px;font-family:var(--font-mono),'IBM Plex Mono';font-size:13px;margin-bottom:20px}
 .modal .summary .row{display:flex;justify-content:space-between;padding:3px 0}
+.summary-charged{display:block;text-align:right;padding:2px 0 0;font-size:12px;opacity:.72}
 .modal-actions{display:flex;gap:12px;margin-top:8px}
 .modal-close{background:none;border:none;font-size:26px;cursor:pointer;color:var(--stone);float:right;line-height:1}
 .form-msg{padding:12px 14px;border-radius:12px;font-size:14px;margin-bottom:16px}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { money } from "@/lib/money";
+import Price, { ChargedInAud } from "./Price";
 import type { Tour } from "@/lib/tours";
 import { useReveal } from "./useReveal";
 import EnquiryModal, { type EnquiryDraft } from "./EnquiryModal";
@@ -132,7 +132,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                         <span className="box">{on ? "✓" : ""}</span>
                         {a.name}
                       </span>
-                      <span className="price">+{money(a.price)} pp</span>
+                      <span className="price">
+                        +<Price aud={a.price} /> pp
+                      </span>
                     </div>
                   );
                 })}
@@ -148,14 +150,18 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                 <span>
                   Base · {guests} guest{guests > 1 ? "s" : ""}
                 </span>
-                <span>{money(current.base * guests)}</span>
+                <span>
+                  <Price aud={current.base * guests} />
+                </span>
               </div>
               {selectedAddOns.map((a) => (
                 <div className="line add" key={a.id}>
                   <span>
                     + {a.name} ×{guests}
                   </span>
-                  <span>{money(a.price * guests)}</span>
+                  <span>
+                    <Price aud={a.price * guests} />
+                  </span>
                 </div>
               ))}
             </div>
@@ -163,9 +169,15 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
               <span className="mono">Estimate</span>
               {/* key changes on total → remount re-runs the bump animation */}
               <b key={total} className="bill-bump">
-                {money(total)}
+                <Price aud={total} />
               </b>
             </div>
+            {/*
+              The amount actually charged, when the figure above isn't in AUD.
+              Always rendered so the card doesn't reflow once converted prices
+              swap in; empty and invisible for AUD visitors.
+            */}
+            <ChargedInAud aud={total} className="bill-charged" />
             {/*
               Private tours are quoted per itinerary in FareHarbor, so this
               figure is a guide, not the price charged at checkout.

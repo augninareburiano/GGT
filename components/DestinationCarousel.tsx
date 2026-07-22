@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Price from "./Price";
 import { SHOWCASE_TOURS, showcaseBg } from "@/lib/showcase";
 
 /**
@@ -229,7 +230,8 @@ export default function DestinationCarousel() {
               >
                 <span className="dc-cap">{slides[id].name}</span>
                 <span className="dc-price">
-                  <span className="dc-from">from</span> {slides[id].from}
+                  <span className="dc-from">from</span>{" "}
+                  <Price aud={slides[id].fromAud} />
                 </span>
               </button>
             ))}
