@@ -5,6 +5,7 @@ import { money } from "@/lib/money";
 import type { Tour } from "@/lib/tours";
 import { useReveal } from "./useReveal";
 import EnquiryModal, { type EnquiryDraft } from "./EnquiryModal";
+import { FAREHARBOR_ENABLED, tourItemId } from "@/lib/fareharbor";
 
 const MAX_GUESTS = 16;
 
@@ -64,6 +65,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     guests,
     addOns: selectedAddOns.map((a) => ({ id: a.id, name: a.name, price: a.price })),
     total,
+    fareharborItemId: tourItemId(current.fareharborItemId),
   };
 
   return (
@@ -158,19 +160,27 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
               ))}
             </div>
             <div className="total">
-              <span className="mono">Total</span>
+              <span className="mono">Estimate</span>
               {/* key changes on total → remount re-runs the bump animation */}
               <b key={total} className="bill-bump">
                 {money(total)}
               </b>
             </div>
+            {/*
+              Private tours are quoted per itinerary in FareHarbor, so this
+              figure is a guide, not the price charged at checkout.
+            */}
+            <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+              A guide only — pick-up point and itinerary change the final price,
+              which is confirmed when you book.
+            </p>
             <button
               type="button"
               className="btn btn-primary"
               style={{ marginTop: 20, width: "100%", justifyContent: "center" }}
               onClick={() => setModalOpen(true)}
             >
-              Send enquiry →
+              {FAREHARBOR_ENABLED ? "Check availability →" : "Send enquiry →"}
             </button>
           </div>
         </div>

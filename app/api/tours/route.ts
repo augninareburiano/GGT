@@ -21,6 +21,10 @@ const tourSchema = z.object({
   min: z.number().int().min(1),
   order: z.number().int().optional(),
   addOns: z.array(addOnSchema).default([]),
+  fareharborItemId: z
+    .string()
+    .regex(/^[0-9]*$/, "FareHarbor item IDs are numeric.")
+    .default(""),
 });
 
 /** GET — public: list tours (falls back to seed data). */

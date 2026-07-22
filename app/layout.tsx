@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { IBM_Plex_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, organizationJsonLd } from "@/lib/seo";
+import { FAREHARBOR_ENABLED } from "@/lib/fareharbor";
 
 const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -60,6 +62,18 @@ export default function RootLayout({
           }}
         />
         {children}
+
+        {/*
+          FareHarbor embed API. `autolightframe=yes` makes it intercept clicks
+          on any fareharbor.com/embeds/book/… link on the page and open it in a
+          modal, which is how every booking CTA here works.
+        */}
+        {FAREHARBOR_ENABLED && (
+          <Script
+            src="https://fareharbor.com/embeds/api/v1/?autolightframe=yes"
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

@@ -15,6 +15,7 @@ type Enquiry = {
   message: string;
   tourName: string;
   guests: number;
+  preferredDate: string;
   addOns: { id: string; name: string; price: number }[];
   total: number;
   status: "new" | "handled";
@@ -173,6 +174,7 @@ export default function AdminPage() {
             </p>
             <p style={{ marginTop: 8, fontSize: 14 }}>
               {e.guests} guest{e.guests > 1 ? "s" : ""} ·{" "}
+              {e.preferredDate ? `${e.preferredDate} · ` : ""}
               {e.addOns.length
                 ? e.addOns.map((a) => a.name).join(", ")
                 : "no add-ons"}{" "}
@@ -263,8 +265,20 @@ function TourEditor({
           placeholder="Min"
         />
       </div>
+      <div className="tour-edit">
+        <input
+          value={draft.fareharborItemId ?? ""}
+          onChange={(e) =>
+            setDraft({ ...draft, fareharborItemId: e.target.value.trim() })
+          }
+          placeholder="FareHarbor item ID (e.g. 123456)"
+        />
+      </div>
       <p className="enq-meta" style={{ marginBottom: 10 }}>
-        id: {draft.id}
+        id: {draft.id} · booking CTA opens{" "}
+        {draft.fareharborItemId
+          ? `FareHarbor item ${draft.fareharborItemId}`
+          : "the full FareHarbor item list"}
       </p>
 
       {draft.addOns.map((a, i) => (

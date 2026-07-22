@@ -20,6 +20,7 @@ export async function getTours(): Promise<Tour[]> {
         min: data.min,
         order: data.order,
         addOns: data.addOns ?? [],
+        fareharborItemId: data.fareharborItemId ?? "",
       } as Tour;
     });
   } catch (err) {

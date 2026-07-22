@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  FAREHARBOR_ENABLED,
+  bookingHref,
+  flagshipBookingHref,
+  tourItemId,
+} from "@/lib/fareharbor";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -30,17 +36,21 @@ export default function Header() {
           {open ? "Close" : "Menu"}
         </button>
         <nav className={open ? "nav-links open" : "nav-links"}>
-          <a href="#" onClick={closeMenu}>
-            Wednesday Tour
+          <a href={flagshipBookingHref()} onClick={closeMenu}>
+            Hunter Valley Tour
           </a>
-          <a href="#" onClick={closeMenu}>
+          <a href={bookingHref({ itemId: tourItemId() })} onClick={closeMenu}>
             Private Tours
           </a>
           <a href="#" onClick={closeMenu}>
             About
           </a>
-          <a href="#builder" className="btn btn-primary" onClick={closeMenu}>
-            Build your tour
+          <a
+            href={flagshipBookingHref()}
+            className="btn btn-primary"
+            onClick={closeMenu}
+          >
+            {FAREHARBOR_ENABLED ? "Book now" : "Build your tour"}
           </a>
         </nav>
       </div>

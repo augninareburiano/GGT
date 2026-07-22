@@ -22,6 +22,12 @@ const enquirySchema = z.object({
   guests: z.number().int().min(1).max(100),
   addOns: z.array(addOnSchema).default([]),
   total: z.number().nonnegative(),
+  /** `YYYY-MM-DD`, passed straight to the FareHarbor availability calendar. */
+  preferredDate: z
+    .string()
+    .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Invalid date.")
+    .optional()
+    .default(""),
 });
 
 /** POST — public: validate, save the enquiry, and email the business. */
@@ -92,6 +98,7 @@ export async function GET(req: Request) {
       message: v.message ?? "",
       tourName: v.tourName,
       guests: v.guests,
+      preferredDate: v.preferredDate ?? "",
       addOns: v.addOns ?? [],
       total: v.total,
       status: v.status ?? "new",
@@ -131,6 +138,7 @@ async function sendNotification(data: EnquiryData, id: string) {
         ``,
         `Tour: ${data.tourName}`,
         `Guests: ${data.guests}`,
+        `Preferred date: ${data.preferredDate || "—"}`,
         `Add-ons: ${addOnsLine}`,
         `Estimated total: ${money(data.total)}`,
         ``,

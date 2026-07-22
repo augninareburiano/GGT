@@ -1,6 +1,7 @@
 "use client";
 
 import { useReveal } from "./useReveal";
+import { flagshipBookingHref } from "@/lib/fareharbor";
 
 export default function TwoDoors() {
   const doorA = useReveal<HTMLDivElement>("door a");
@@ -12,7 +13,7 @@ export default function TwoDoors() {
         <div ref={doorA.ref} className={doorA.className}>
           <div>
             <p className="eyebrow" style={{ color: "rgba(255,255,255,.75)" }}>
-              Every Wednesday · up to 16 guests
+              Every Monday &amp; Wednesday · up to 16 guests
             </p>
             <h3>The Hunter Valley Food &amp; Wine Tour</h3>
             <p>
@@ -21,7 +22,7 @@ export default function TwoDoors() {
             </p>
           </div>
           <a
-            href="#"
+            href={flagshipBookingHref()}
             className="btn btn-light"
             style={{ alignSelf: "flex-start", marginTop: 18 }}
           >
