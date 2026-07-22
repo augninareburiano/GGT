@@ -9,10 +9,19 @@
  * file at a time, with no other code changes.
  *
  * @param gradient A CSS gradient (or any solid colour) used as the fallback.
- * @param image    Optional path/URL to a photo, e.g. "/images/tours/hunter.jpg".
+ * @param image    Optional path/URL to a photo, e.g. "/images/tours/hunter.webp".
+ * @param focus    Optional CSS `background-position` naming the part of the
+ *                 photo to keep when it gets cropped, e.g. "72% center".
+ *                 Only bites where the frame is narrower than the photo (the
+ *                 150×210 carousel thumbnails) — a full-bleed slide is wider
+ *                 than it is tall, so `cover` already shows the whole width.
  */
-export function mediaBg(gradient: string, image?: string): string {
+export function mediaBg(
+  gradient: string,
+  image?: string,
+  focus = "center",
+): string {
   return image
-    ? `url("${image}") center/cover no-repeat, ${gradient}`
+    ? `url("${image}") ${focus}/cover no-repeat, ${gradient}`
     : gradient;
 }

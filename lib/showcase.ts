@@ -19,12 +19,18 @@ export type ShowcaseTour = {
   from: string;
   /** CSS gradient fallback, shown behind any photo. */
   bg: string;
-  /** Optional photo path/URL, e.g. `/images/tours/hunter.jpg`. */
+  /** Optional photo path/URL, e.g. `/images/tours/hunter.webp`. */
   image?: string;
+  /**
+   * Optional CSS `background-position` for photos whose subject sits off-centre,
+   * so the 150×210 thumbnail doesn't crop it away. Defaults to `center`.
+   */
+  focus?: string;
 };
 
 /** Effective CSS background for a showcase tour: photo over gradient fallback. */
-export const showcaseBg = (t: ShowcaseTour): string => mediaBg(t.bg, t.image);
+export const showcaseBg = (t: ShowcaseTour): string =>
+  mediaBg(t.bg, t.image, t.focus);
 
 export const SHOWCASE_TOURS: ShowcaseTour[] = [
   {
@@ -33,9 +39,10 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     name: "Hunter Valley, private",
     blurb: "Cellar doors, long lunch, and a chef who cooks to match every glass.",
     from: "A$220",
-    bg: "linear-gradient(150deg,#8FB31E,#3C4A14)",
-    // Drop a photo at public/images/tours/hunter.jpg and uncomment:
-    // image: "/images/tours/hunter.jpg",
+    bg: "linear-gradient(150deg,#858d47,#35381d)",
+    image: "/images/tours/hunter.webp",
+    // Keep the cellar-door cottage, which sits left of centre.
+    focus: "32% center",
   },
   {
     id: "beaches",
@@ -44,7 +51,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     blurb:
       "The coast at its best, finishing with a tasting paddle at a local brewery.",
     from: "A$160",
-    bg: "linear-gradient(150deg,#19B3B3,#0A6E6E)",
+    bg: "linear-gradient(150deg,#7d7f6e,#32332c)",
+    image: "/images/tours/beaches.webp",
   },
   {
     id: "foodie",
@@ -53,7 +61,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     blurb:
       "Bakery, fish market, cheese, chocolate and a pie or two. Bring an appetite.",
     from: "A$120",
-    bg: "linear-gradient(150deg,#FF7A2E,#D63E00)",
+    bg: "linear-gradient(150deg,#b4ad8a,#484537)",
+    image: "/images/tours/foodie.webp",
   },
   {
     id: "jenolan",
@@ -61,7 +70,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     name: "Blue Mountains & Jenolan Overnight",
     blurb: "A big day in the ranges, a night under canvas, a campfire dinner.",
     from: "A$320",
-    bg: "linear-gradient(150deg,#F4B400,#B5790A)",
+    bg: "linear-gradient(150deg,#7b8c90,#31383a)",
+    image: "/images/tours/jenolan.webp",
   },
   {
     id: "highlands",
@@ -69,7 +79,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     name: "Southern Highlands",
     blurb: "Rolling green hills, pinot and pie, and a fireside long lunch.",
     from: "A$210",
-    bg: "linear-gradient(150deg,#8E4585,#3B1E4A)",
+    bg: "linear-gradient(150deg,#a59389,#423b37)",
+    image: "/images/tours/highlands.webp",
   },
   {
     id: "central-coast",
@@ -78,7 +89,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     blurb:
       "Shuck-your-own oysters on the flats, then lunch where the river meets the sea.",
     from: "A$175",
-    bg: "linear-gradient(150deg,#2E6E9E,#0E3B5C)",
+    bg: "linear-gradient(150deg,#e1b373,#5a482e)",
+    image: "/images/tours/central-coast.webp",
   },
   {
     id: "blue-mountains-day",
@@ -87,7 +99,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     blurb:
       "Three Sisters, a bushwalk, and a gourmet picnic on the escarpment.",
     from: "A$180",
-    bg: "linear-gradient(150deg,#C7522A,#6E2412)",
+    bg: "linear-gradient(150deg,#82867d,#343532)",
+    image: "/images/tours/blue-mountains-day.webp",
   },
   {
     id: "orange-mudgee",
@@ -95,7 +108,8 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     name: "Orange & Mudgee",
     blurb: "Altitude wines, orchard produce and a table set among the rows.",
     from: "A$260",
-    bg: "linear-gradient(150deg,#9E2B45,#4A1020)",
+    bg: "linear-gradient(150deg,#637571,#282f2d)",
+    image: "/images/tours/orange-mudgee.webp",
   },
   {
     id: "kangaroo-valley",
@@ -104,6 +118,9 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     blurb:
       "Kayaks, cheese, and a slow drive through the greenest valley in the state.",
     from: "A$195",
-    bg: "linear-gradient(150deg,#3FA796,#155246)",
+    bg: "linear-gradient(150deg,#a3ac82,#414534)",
+    image: "/images/tours/kangaroo-valley.webp",
+    // Keep the kangaroos, which stand right of centre.
+    focus: "72% center",
   },
 ];

@@ -175,19 +175,48 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .foot h5{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:var(--stone)}
 
 /* destination carousel */
-.dc{position:relative;height:calc(100vh - 70px);min-height:560px;overflow:hidden;background:var(--ink);color:#fff}
-.dc-bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .8s ease}
-.dc-bg-layer::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,16,22,.7),rgba(20,16,22,.2) 45%,rgba(20,16,22,.45))}
-.dc-scrim{position:absolute;left:0;right:0;bottom:0;height:180px;z-index:2;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(20,16,22,.55))}
-.dc-clone{position:absolute;display:none;z-index:3;overflow:hidden;background-size:cover;background-position:center;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);will-change:width,height,top,left}
-.dc-inner{position:relative;z-index:4;height:100%;display:flex;flex-direction:column;justify-content:center;padding-bottom:128px}
+/* --dc-darken / --dc-grain are the two taste knobs for the photo grade.
+   isolation:isolate keeps the grain's mix-blend-mode from reaching the page
+   behind the carousel.
+   Stack, bottom to top: bg layers 0 (active 1), morph clone 2, grade + grain 3,
+   bottom scrim 4, copy and controls 5. */
+.dc{position:relative;height:calc(100vh - 70px);min-height:560px;overflow:hidden;background:var(--ink);color:#fff;isolation:isolate;--dc-darken:.18;--dc-grain:.13}
+/* One grade for the whole carousel, not one per layer: mid-wipe two layers are
+   on screen at once and per-layer scrims would stack, visibly double-darkening
+   the columns that haven't wiped in yet. */
+.dc::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(90deg,rgba(20,16,22,.72),rgba(20,16,22,.34) 45%,rgba(20,16,22,.55)),rgba(20,16,22,var(--dc-darken))}
+/* Film grain: inline SVG turbulence, so no extra request. */
+.dc::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;opacity:var(--dc-grain);mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23g)'/%3E%3C/svg%3E");background-size:150px 150px}
+/* Layer stack, outermost first. Each ring owns exactly one transform so they
+   never fight (see components/DestinationCarousel.tsx):
+     .dc-bg-layer     visibility + stacking
+       .dc-bg-parallax  cursor counter-motion
+         .dc-bg-photo   the photo, Ken Burns scale (WAAPI)
+   The grade and grain live on .dc, above this whole stack.
+   Layers cut rather than cross-fade: the morph clone is already showing the
+   new photo full-bleed when the swap happens, so it's invisible. Fading here
+   would reveal the outgoing photo through the clone's handoff. */
+.dc-bg-layer{position:absolute;inset:0;overflow:hidden;opacity:0;z-index:0}
+.dc-bg-layer.is-active{opacity:1;z-index:1}
+/* Bleed past the frame so cursor parallax can't drag an edge into view. */
+.dc-bg-parallax{position:absolute;inset:-24px;will-change:transform}
+.dc-bg-photo{position:absolute;inset:0;background-size:cover;background-position:center;will-change:transform}
+.dc-scrim{position:absolute;left:0;right:0;bottom:0;height:180px;z-index:4;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(20,16,22,.55))}
+.dc-clone{position:absolute;display:none;z-index:2;overflow:hidden;background-size:cover;background-position:center;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);will-change:width,height,top,left}
+/* Wider than the site-wide .wrap (1180px): the carousel is full-bleed, so the
+   headline can sit further left and the thumbnail strip further right without
+   looking unmoored. Both edges move outward from this one value. */
+.dc-inner{position:relative;z-index:5;height:100%;max-width:min(1520px,94vw);display:flex;flex-direction:column;justify-content:center;padding-bottom:128px}
 
-.dc-copy{max-width:min(46ch,58%);animation:fadeUp .6s ease both}
+.dc-copy-parallax{will-change:transform}
+/* 54% rather than 58% — the container got wider and the title got bigger, so
+   this is what keeps the headline clear of the thumbnail strip. */
+.dc-copy{max-width:min(46ch,54%);animation:fadeUp .6s ease both}
 /* tier 1 — kicker: small, spaced, gold, with a rule to anchor it */
 .dc-region{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .dc-region::before{content:"";width:26px;height:2px;background:var(--gold);opacity:.9}
 /* tier 2 — the headline: dominant */
-.dc-title{font-size:clamp(32px,5.2vw,70px);line-height:.98;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.45)}
+.dc-title{font-size:clamp(34px,6vw,84px);line-height:.98;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.45)}
 /* tier 3 — supporting copy: quieter than the headline */
 .dc-blurb{max-width:34ch;margin:18px 0 26px;font-size:15px;line-height:1.55;color:rgba(255,255,255,.78)}
 .dc-cta{display:flex;gap:12px;flex-wrap:wrap}
@@ -195,18 +224,22 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 /* Vertical padding gives the cards' box-shadows room inside the clip box, so
    overflow:hidden (needed to clip the horizontal slide) no longer slices the
    shadows off with a hard edge. pointer-events keep the padded area click-through. */
-.dc-thumbs{position:absolute;right:28px;top:50%;transform:translateY(-50%);width:470px;padding:64px 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
-.dc-track{display:flex;align-items:center;gap:16px;height:auto;will-change:transform}
-.dc-thumb{position:relative;width:150px;height:210px;flex:none;border:none;padding:0;border-radius:16px;overflow:hidden;cursor:pointer;pointer-events:auto;background-size:cover;background-position:center;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease, opacity .2s ease}
+/* Anchored to the bottom rather than centred: the gap to the controls then
+   stays constant at any viewport height, instead of ballooning on tall screens
+   and closing up on short ones. The 64px bottom padding is shadow room, so the
+   visible card edge sits 120px up — clear of the controls at 34-80px. */
+.dc-thumbs{position:absolute;right:28px;bottom:56px;width:560px;padding:64px 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
+.dc-track{display:flex;align-items:center;gap:18px;height:auto;will-change:transform}
+.dc-thumb{position:relative;width:180px;height:252px;flex:none;border:none;padding:0;border-radius:16px;overflow:hidden;cursor:pointer;pointer-events:auto;background-size:cover;background-position:center;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease, opacity .2s ease}
 .dc-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.6))}
 .dc-thumb:hover{transform:translateY(-8px);box-shadow:0 30px 54px -20px rgba(0,0,0,.7)}
 /* the "up next" card sits slightly forward of the queued ones */
 .dc-thumb-next{box-shadow:0 26px 50px -18px rgba(0,0,0,.75),0 0 0 2px rgba(255,255,255,.5)}
 .dc-thumb-next::before{content:"Up next";position:absolute;top:10px;left:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.35);padding:3px 7px;border-radius:999px;backdrop-filter:blur(2px)}
 /* card tier 1 — the tour name, brightest element on the card */
-.dc-cap{position:absolute;left:14px;bottom:34px;right:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:13px;font-weight:500;line-height:1.25;letter-spacing:.03em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.dc-cap{position:absolute;left:16px;bottom:38px;right:14px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:14px;font-weight:500;line-height:1.25;letter-spacing:.03em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
 /* card tier 2 — the price, with a de-emphasised "from" */
-.dc-price{position:absolute;left:14px;bottom:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:14px;font-weight:bold;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.dc-price{position:absolute;left:16px;bottom:14px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:15px;font-weight:bold;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
 .dc-from{font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6)}
 
 .dc-controls{position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -225,7 +258,27 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .dc-index b{font-size:52px;line-height:1;letter-spacing:-.03em}
 .dc-index span{font-size:13px;color:rgba(255,255,255,.55)}
 
-@media(max-width:900px){
+/* The enlarged headline and cards only fit side by side on wide screens.
+   Below this they'd collide, so step both back to the previous sizing. */
+@media(max-width:1400px){
+  .dc-thumbs{width:470px}
+  .dc-thumb{width:150px;height:210px}
+  .dc-track{gap:16px}
+  .dc-title{font-size:clamp(32px,5.2vw,70px)}
+  .dc-cap{left:14px;bottom:34px;right:12px;font-size:13px}
+  .dc-price{left:14px;bottom:12px;font-size:14px}
+}
+/* Narrow laptops: shrink the cards again to keep them off the headline.
+   (This band overlapped before these changes too — the strip is hidden
+   entirely below 940px, where even these no longer fit.) */
+@media(max-width:1200px){
+  .dc-thumbs{width:384px}
+  .dc-thumb{width:120px;height:168px}
+  .dc-track{gap:12px}
+  .dc-cap{left:11px;bottom:30px;right:10px;font-size:11px}
+  .dc-price{left:11px;bottom:10px;font-size:12px}
+}
+@media(max-width:940px){
   .dc-thumbs{display:none}
   .dc{height:74vh;min-height:460px}
   .dc-copy{max-width:38ch}

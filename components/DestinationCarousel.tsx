@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SHOWCASE_TOURS, showcaseBg } from "@/lib/showcase";
+import { SHOWCASE_TOURS, showcaseBg, type ShowcaseTour } from "@/lib/showcase";
 
 /**
  * A "Globe Express"–style destination carousel that doubles as the landing hero.
@@ -20,9 +20,29 @@ const SLIDE_MS = 6000; // autoplay dwell per slide
 const SLIDE_SEC = SLIDE_MS / 1000;
 const VISIBLE = 3; // thumbnails fully in view; one more is rendered to slide in
 const EASE = "cubic-bezier(.7,0,.2,1)";
+const KEN_BURNS_SCALE = 1.085; // how far the active photo drifts over its dwell
+
+// Cursor parallax, in px at full deflection. Both stay under the 24px bleed
+// on .dc-bg-parallax so no edge can be pulled into frame.
+const PARALLAX_BG = 14;
+const PARALLAX_COPY = 7;
+const PARALLAX_EASE = 0.06; // per-frame approach to the cursor; lower = lazier
 
 const fmt = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+/**
+ * Where the Ken Burns zoom converges.
+ *
+ * Horizontally it reuses the tour's `focus` point, so the drift pushes *into*
+ * the subject (the cellar door, the kangaroos) rather than the middle of a
+ * paddock. Vertically it alternates, so nine consecutive slides don't all move
+ * the same way.
+ */
+const kenBurnsOrigin = (t: ShowcaseTour, i: number): string => {
+  const x = t.focus?.trim().split(/\s+/)[0] ?? "50%";
+  return `${x} ${i % 2 === 0 ? "72%" : "28%"}`;
+};
 
 export default function DestinationCarousel() {
   const slides = SHOWCASE_TOURS;
@@ -38,6 +58,10 @@ export default function DestinationCarousel() {
   const cloneRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const photoRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const kenBurnsRef = useRef<Record<number, Animation | null>>({});
+  const bgParallaxRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const copyParallaxRef = useRef<HTMLDivElement>(null);
   // Mirror of `animating` that `go` can read live — the autoplay timeout closes
   // over stale state, so the ref is what actually gates re-entry.
   const animatingRef = useRef(false);
@@ -75,6 +99,22 @@ export default function DestinationCarousel() {
         setAnim(false);
       }),
     );
+  };
+
+  /** Slide the thumbnail strip left by exactly one card. True if it animated. */
+  const slideStrip = (): boolean => {
+    const track = trackRef.current;
+    const first = thumbRefs.current[windowIds[0]];
+    const second = thumbRefs.current[windowIds[1]];
+    if (!track || !first || !second) return false;
+    const step =
+      second.getBoundingClientRect().left - first.getBoundingClientRect().left;
+    track.style.transition = "none";
+    track.style.transform = "translateX(0)";
+    void track.offsetWidth; // reflow so the rest position is registered
+    track.style.transition = `transform ${MORPH_MS}ms ${EASE}`;
+    track.style.transform = `translateX(-${step}px)`;
+    return true;
   };
 
   const morphTo = (target: number) => {
@@ -120,19 +160,7 @@ export default function DestinationCarousel() {
     //    card morphs away.
     if (isNext) {
       setMorphingId(target); // hide the morphing card so only the clone shows
-      const track = trackRef.current;
-      const first = thumbRefs.current[windowIds[0]];
-      const second = thumbRefs.current[windowIds[1]];
-      if (track && first && second) {
-        const step =
-          second.getBoundingClientRect().left -
-          first.getBoundingClientRect().left;
-        track.style.transition = "none";
-        track.style.transform = "translateX(0)";
-        void track.offsetWidth;
-        track.style.transition = `transform ${MORPH_MS}ms ${EASE}`;
-        track.style.transform = `translateX(-${step}px)`;
-      }
+      slideStrip();
     }
 
     window.setTimeout(() => finalize(target), MORPH_MS);
@@ -141,7 +169,7 @@ export default function DestinationCarousel() {
   const go = (target: number) => {
     if (target === index || animatingRef.current) return;
     if (prefersReduced() || !thumbRefs.current[target]) {
-      setIndex(target); // fallback: plain cross-fade of the bg layers
+      setIndex(target); // fallback: straight cut between bg layers
       return;
     }
     morphTo(target);
@@ -158,6 +186,84 @@ export default function DestinationCarousel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, index]);
 
+  // Ken Burns: the active photo drifts for as long as the slide is up, so the
+  // 6s dwell is never a still frame. Driven by WAAPI rather than a CSS class
+  // because `fill: "forwards"` leaves the outgoing photo at its final scale —
+  // a CSS animation would unset and snap it back mid cross-fade.
+  //
+  // Every slide starts at scale(1) so it lines up with the morph clone, which
+  // hands over at its natural size. Scale only ever grows, so no edge gaps.
+  useEffect(() => {
+    const el = photoRefs.current[index];
+    if (!el || prefersReduced()) return;
+    // Drop this layer's previous run before starting another, so repeat visits
+    // to a slide don't stack fill-forwards animations on the same element.
+    kenBurnsRef.current[index]?.cancel();
+    kenBurnsRef.current[index] = el.animate(
+      [{ transform: "scale(1)" }, { transform: `scale(${KEN_BURNS_SCALE})` }],
+      { duration: SLIDE_MS + MORPH_MS, easing: "linear", fill: "forwards" },
+    );
+    // Deliberately no cleanup: the outgoing photo must hold its final scale
+    // while it cross-fades out. Cancelling here would snap it back to 1.
+  }, [index]);
+
+  // Pausing the carousel pauses the drift too, so the photo doesn't keep
+  // moving behind a stopped progress bar.
+  useEffect(() => {
+    const anim = kenBurnsRef.current[index];
+    if (!anim) return;
+    if (playing) anim.play();
+    else anim.pause();
+  }, [index, playing]);
+
+  // Cursor parallax. Kept off React state — this runs every frame, and a
+  // re-render per frame would be absurd. Pointer-coarse devices have no cursor
+  // to follow, so they skip it entirely.
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || prefersReduced()) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    let targetX = 0,
+      targetY = 0,
+      curX = 0,
+      curY = 0,
+      raf = 0;
+
+    const onMove = (e: MouseEvent) => {
+      const r = section.getBoundingClientRect();
+      targetX = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      targetY = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    };
+    const onLeave = () => {
+      targetX = 0;
+      targetY = 0;
+    };
+
+    const tick = () => {
+      curX += (targetX - curX) * PARALLAX_EASE;
+      curY += (targetY - curY) * PARALLAX_EASE;
+      for (const el of Object.values(bgParallaxRefs.current)) {
+        if (el)
+          el.style.transform = `translate3d(${curX * PARALLAX_BG}px, ${curY * PARALLAX_BG * 0.6}px, 0)`;
+      }
+      // Copy drifts against the photo — that opposition is what reads as depth.
+      const copy = copyParallaxRef.current;
+      if (copy)
+        copy.style.transform = `translate3d(${curX * -PARALLAX_COPY}px, ${curY * -PARALLAX_COPY * 0.6}px, 0)`;
+      raf = requestAnimationFrame(tick);
+    };
+
+    section.addEventListener("mousemove", onMove);
+    section.addEventListener("mouseleave", onLeave);
+    raf = requestAnimationFrame(tick);
+    return () => {
+      section.removeEventListener("mousemove", onMove);
+      section.removeEventListener("mouseleave", onLeave);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   // Timer readout, reset whenever the slide changes.
   useEffect(() => {
     setElapsed(0);
@@ -173,9 +279,28 @@ export default function DestinationCarousel() {
       {slides.map((s, i) => (
         <div
           key={i}
-          className="dc-bg-layer"
-          style={{ background: showcaseBg(s), opacity: i === index ? 1 : 0 }}
-        />
+          className={i === index ? "dc-bg-layer is-active" : "dc-bg-layer"}
+        >
+          <div
+            className="dc-bg-parallax"
+            ref={(el) => {
+              bgParallaxRefs.current[i] = el;
+            }}
+          >
+            {/* Own element so the Ken Burns scale and the parallax translate
+                don't overwrite each other — one transform per ring. */}
+            <div
+              className="dc-bg-photo"
+              ref={(el) => {
+                photoRefs.current[i] = el;
+              }}
+              style={{
+                background: showcaseBg(s),
+                transformOrigin: kenBurnsOrigin(s, i),
+              }}
+            />
+          </div>
+        </div>
       ))}
 
       {/* Bottom scrim keeps the controls legible over bright slides. */}
@@ -185,6 +310,9 @@ export default function DestinationCarousel() {
       <div className="dc-clone" ref={cloneRef} aria-hidden />
 
       <div className="wrap dc-inner">
+        {/* Wrapper carries the parallax so it can't collide with the fadeUp
+            animation on .dc-copy, which also writes transform. */}
+        <div className="dc-copy-parallax" ref={copyParallaxRef}>
         <div className="dc-copy" key={index}>
           <p className="dc-region">{slide.region}</p>
           <h2 className="dc-title">{slide.name}</h2>
@@ -207,6 +335,7 @@ export default function DestinationCarousel() {
               Discover location
             </a>
           </div>
+        </div>
         </div>
 
         <div className="dc-thumbs">
