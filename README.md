@@ -63,3 +63,10 @@ firebase deploy --only firestore:rules
 - Email uses Resend. To use the pure-Firebase "Trigger Email" extension instead,
   remove `sendNotification` from `app/api/enquiries/route.ts` and write to a
   `mail` collection / install the extension.
+- Enquiries are written to Firestore *before* either email is attempted, and
+  both sends are best-effort — a Resend outage, a bad key or an unverified
+  domain can never lose an enquiry or fail the request. Rejected sends are
+  logged server-side (`… rejected by Resend …`); the client is told the
+  enquiry succeeded, because it did.
+- Sending requires a domain verified in Resend that exactly matches the domain
+  in `ENQUIRY_FROM_EMAIL`. See the comments in `.env.local.example`.
