@@ -1,4 +1,5 @@
 import { mediaBg } from "@/lib/media";
+import { flagshipBookingHref } from "@/lib/fareharbor";
 
 /**
  * The three stacked hero images. `gradient` is the placeholder; set `image` to
@@ -49,7 +50,7 @@ export default function Hero() {
             <a href="#builder" className="btn btn-primary">
               Build your tour →
             </a>
-            <a href="#" className="btn btn-ghost">
+            <a href={flagshipBookingHref()} className="btn btn-ghost">
               Join the Wednesday tour
             </a>
           </div>

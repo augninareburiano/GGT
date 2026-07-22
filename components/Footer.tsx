@@ -2,6 +2,12 @@
 
 import { useReveal } from "./useReveal";
 import { SOCIAL_LINKS } from "@/lib/seo";
+import {
+  bookingHref,
+  flagshipBookingHref,
+  giftBookingHref,
+  tourItemId,
+} from "@/lib/fareharbor";
 
 export default function Footer() {
   const c1 = useReveal<HTMLDivElement>();
@@ -29,15 +35,15 @@ export default function Footer() {
         </div>
         <div ref={c2.ref} className={c2.className}>
           <h5>Tours</h5>
-          <a href="#">Wednesday Hunter Valley</a>
-          <a href="#">Private tours</a>
+          <a href={flagshipBookingHref()}>Wednesday Hunter Valley</a>
+          <a href={bookingHref({ itemId: tourItemId() })}>Private tours</a>
           <a href="#builder">Build your tour</a>
         </div>
         <div ref={c3.ref} className={c3.className}>
           <h5>Company</h5>
           <a href="#">About Jimmy</a>
           <a href="#">FAQ</a>
-          <a href="#">Gift cards</a>
+          <a href={giftBookingHref()}>Gift cards</a>
         </div>
         <div ref={c4.ref} className={c4.className}>
           <h5>Get in touch</h5>
