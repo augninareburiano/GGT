@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { FieldValue } from "firebase-admin/firestore";
+import type { CreateEmailOptions } from "resend";
 import { adminDb, verifyAdmin } from "@/lib/firebase.admin";
 import { money } from "@/lib/money";
 
 export const runtime = "nodejs";
+
+/**
+ * How long we'll wait on Resend before giving up on an email. The enquiry is
+ * already saved by the time we get here, so the only thing still riding on
+ * this request is the guest's "Sending…" spinner — that matters more than the
+ * notification, and the whole handler has to finish inside the platform's
+ * function timeout regardless.
+ */
+const EMAIL_TIMEOUT_MS = 5_000;
 
 const addOnSchema = z.object({
   id: z.string(),
@@ -111,6 +121,49 @@ export async function GET(req: Request) {
 
 type EnquiryData = z.infer<typeof enquirySchema>;
 
+/** Rejects if `promise` hasn't settled within `ms`. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`Timed out after ${ms}ms`)),
+      ms,
+    );
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * Sends one email, reporting failures instead of throwing.
+ *
+ * Resend resolves with `{ data, error }` rather than rejecting when the API
+ * refuses a send — an unverified sending domain, a `from` that doesn't match
+ * the verified domain, a rate limit — so the result has to be inspected
+ * explicitly. Awaiting the call alone would treat every one of those as
+ * success and leave no trace of why no mail arrived.
+ *
+ * Callers rely on this never throwing: the enquiry is already in the database,
+ * and no email problem may turn a saved enquiry into an error response.
+ */
+async function sendEmail(label: string, apiKey: string, payload: CreateEmailOptions) {
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
+    const { error } = await withTimeout(
+      resend.emails.send(payload),
+      EMAIL_TIMEOUT_MS,
+    );
+    if (error) {
+      console.error(
+        `${label} rejected by Resend (enquiry still saved) — ${error.name}: ${error.message}`,
+      );
+    }
+  } catch (err) {
+    // Network failure, timeout, or a malformed payload.
+    console.error(`${label} failed (enquiry still saved):`, err);
+  }
+}
+
 /** Sends a notification email via Resend, if configured. Non-fatal on failure. */
 async function sendNotification(data: EnquiryData, id: string) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -121,38 +174,32 @@ async function sendNotification(data: EnquiryData, id: string) {
     return;
   }
 
-  try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(apiKey);
-    const addOnsLine = data.addOns.length
-      ? data.addOns.map((a) => a.name).join(", ")
-      : "—";
+  const addOnsLine = data.addOns.length
+    ? data.addOns.map((a) => a.name).join(", ")
+    : "—";
 
-    await resend.emails.send({
-      from,
-      to,
-      replyTo: data.email,
-      subject: `New tour enquiry — ${data.tourName} (${data.name})`,
-      text: [
-        `New enquiry #${id}`,
-        ``,
-        `Tour: ${data.tourName}`,
-        `Guests: ${data.guests}`,
-        `Preferred date: ${data.preferredDate || "—"}`,
-        `Add-ons: ${addOnsLine}`,
-        `Estimated total: ${money(data.total)}`,
-        ``,
-        `Name: ${data.name}`,
-        `Email: ${data.email}`,
-        `Phone: ${data.phone || "—"}`,
-        ``,
-        `Message:`,
-        data.message || "—",
-      ].join("\n"),
-    });
-  } catch (err) {
-    console.error("Email notification failed (enquiry still saved):", err);
-  }
+  await sendEmail("Business notification", apiKey, {
+    from,
+    to,
+    replyTo: data.email,
+    subject: `New tour enquiry — ${data.tourName} (${data.name})`,
+    text: [
+      `New enquiry #${id}`,
+      ``,
+      `Tour: ${data.tourName}`,
+      `Guests: ${data.guests}`,
+      `Preferred date: ${data.preferredDate || "—"}`,
+      `Add-ons: ${addOnsLine}`,
+      `Estimated total: ${money(data.total)}`,
+      ``,
+      `Name: ${data.name}`,
+      `Email: ${data.email}`,
+      `Phone: ${data.phone || "—"}`,
+      ``,
+      `Message:`,
+      data.message || "—",
+    ].join("\n"),
+  });
 }
 
 /**
@@ -171,48 +218,43 @@ async function sendCustomerConfirmation(data: EnquiryData, id: string) {
     return;
   }
 
-  try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(apiKey);
-    const addOnsLine = data.addOns.length
-      ? data.addOns.map((a) => a.name).join(", ")
-      : "—";
-    const firstName = data.name.trim().split(/\s+/)[0] || "there";
+  const addOnsLine = data.addOns.length
+    ? data.addOns.map((a) => a.name).join(", ")
+    : "—";
+  const firstName = data.name.trim().split(/\s+/)[0] || "there";
 
-    await resend.emails.send({
-      from,
-      to: data.email,
-      ...(replyTo ? { replyTo } : {}),
-      subject: `We got your enquiry — ${data.tourName}`,
-      text: [
-        `Hi ${firstName},`,
-        ``,
-        `Thanks for your enquiry with Gourmet Getaway Tours! We've received`,
-        `it and Jimmy will be in touch shortly to lock in the details.`,
-        ``,
-        `Here's a copy of what you sent us:`,
-        ``,
-        `Tour: ${data.tourName}`,
-        `Guests: ${data.guests}`,
-        `Add-ons: ${addOnsLine}`,
-        `Estimated total: ${money(data.total)}`,
-        ``,
-        data.message ? `Your message: ${data.message}` : ``,
-        ``,
-        `Reference: #${id}`,
-        ``,
-        `If anything looks off, just reply to this email.`,
-        ``,
-        `Cheers,`,
-        `The Gourmet Getaway Tours team`,
-      ]
-        .filter((line) => line !== "")
-        .join("\n"),
-      html: confirmationHtml(data, id, firstName, addOnsLine),
-    });
-  } catch (err) {
-    console.error("Customer confirmation email failed (enquiry still saved):", err);
-  }
+  await sendEmail("Customer confirmation", apiKey, {
+    from,
+    to: data.email,
+    ...(replyTo ? { replyTo } : {}),
+    subject: `We got your enquiry — ${data.tourName}`,
+    text: [
+      `Hi ${firstName},`,
+      ``,
+      `Thanks for your enquiry with Gourmet Getaway Tours! We've received`,
+      `it and Jimmy will be in touch shortly to lock in the details.`,
+      ``,
+      `Here's a copy of what you sent us:`,
+      ``,
+      `Tour: ${data.tourName}`,
+      `Guests: ${data.guests}`,
+      `Add-ons: ${addOnsLine}`,
+      `Estimated total: ${money(data.total)}`,
+      ``,
+      // `null` drops the line entirely; `""` is a deliberate blank line.
+      data.message ? `Your message: ${data.message}` : null,
+      ``,
+      `Reference: #${id}`,
+      ``,
+      `If anything looks off, just reply to this email.`,
+      ``,
+      `Cheers,`,
+      `The Gourmet Getaway Tours team`,
+    ]
+      .filter((line) => line !== null)
+      .join("\n"),
+    html: confirmationHtml(data, id, firstName, addOnsLine),
+  });
 }
 
 /** Builds the branded HTML body for the customer confirmation email. */
