@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { money } from "@/lib/money";
+import Price, { ChargedInAud } from "./Price";
 import { FAREHARBOR_ENABLED, type FareHarborPrefill } from "@/lib/fareharbor";
 import { openFareHarbor } from "@/lib/fareharbor.client";
 
@@ -137,13 +137,22 @@ export default function EnquiryModal({
               {draft.addOns.map((a) => (
                 <div className="row" key={a.id}>
                   <span>+ {a.name}</span>
-                  <span>{money(a.price * draft.guests)}</span>
+                  <span>
+                    <Price aud={a.price * draft.guests} />
+                  </span>
                 </div>
               ))}
               <div className="row">
                 <b>Estimate</b>
-                <b>{money(draft.total)}</b>
+                <b>
+                  <Price aud={draft.total} />
+                </b>
               </div>
+              {/*
+                Last screen before checkout, so the amount that will actually
+                hit the card belongs here whenever the total above is converted.
+              */}
+              <ChargedInAud aud={draft.total} className="summary-charged" />
             </div>
 
             {status === "err" && (
