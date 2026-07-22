@@ -1,3 +1,36 @@
+import { mediaBg } from "@/lib/media";
+
+/**
+ * The three stacked hero images. `gradient` is the placeholder; set `image` to
+ * a photo path (e.g. `/images/hero/hunter-valley.jpg`) to swap in real
+ * photography — the gradient stays behind as a loading / missing fallback.
+ */
+const HERO_MEDIA: {
+  cls: string;
+  label: string;
+  gradient: string;
+  image?: string;
+}[] = [
+  {
+    cls: "ph1",
+    label: "Hunter Valley",
+    gradient: "linear-gradient(150deg,#8FB31E,#3C4A14)",
+    // image: "/images/hero/hunter-valley.jpg",
+  },
+  {
+    cls: "ph2",
+    label: "Your chef on the road",
+    gradient: "linear-gradient(150deg,#FF7A2E,#D63E00)",
+    // image: "/images/hero/chef-on-the-road.jpg",
+  },
+  {
+    cls: "ph3",
+    label: "Blue Mountains",
+    gradient: "linear-gradient(150deg,#19B3B3,#0A6E6E)",
+    // image: "/images/hero/blue-mountains.jpg",
+  },
+];
+
 export default function Hero() {
   return (
     <section className="hero">
@@ -22,15 +55,15 @@ export default function Hero() {
           </div>
         </div>
         <div className="stack">
-          <div className="ph ph1">
-            <span>Hunter Valley</span>
-          </div>
-          <div className="ph ph2">
-            <span>Your chef on the road</span>
-          </div>
-          <div className="ph ph3">
-            <span>Blue Mountains</span>
-          </div>
+          {HERO_MEDIA.map((m) => (
+            <div
+              key={m.cls}
+              className={`ph ${m.cls}`}
+              style={{ background: mediaBg(m.gradient, m.image) }}
+            >
+              <span>{m.label}</span>
+            </div>
+          ))}
           <div className="tag">★ 30 years in food &amp; wine</div>
         </div>
       </div>

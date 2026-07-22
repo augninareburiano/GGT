@@ -1,6 +1,11 @@
 "use client";
 
 import { useReveal } from "./useReveal";
+import { mediaBg } from "@/lib/media";
+
+// Set to a photo path (e.g. "/images/jimmy.jpg") to swap in a real portrait;
+// the gradient stays behind as a fallback.
+const JIMMY_IMAGE: string | undefined = undefined;
 
 export default function JimmyStrip() {
   const strip = useReveal<HTMLDivElement>("jimmy");
@@ -8,7 +13,15 @@ export default function JimmyStrip() {
   return (
     <section className="wrap">
       <div ref={strip.ref} className={strip.className}>
-        <div className="avatar" />
+        <div
+          className="avatar"
+          style={{
+            background: mediaBg(
+              "linear-gradient(150deg,#3FD0D0,#0A6E6E)",
+              JIMMY_IMAGE,
+            ),
+          }}
+        />
         <div>
           <p className="eyebrow" style={{ color: "rgba(255,255,255,.75)" }}>
             Owner-operated
