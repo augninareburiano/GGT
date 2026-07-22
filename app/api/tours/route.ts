@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { adminDb, verifyAdmin } from "@/lib/firebase.admin";
+import { DEFAULT_MAX_GUESTS } from "@/lib/tours";
 import { getTours } from "@/lib/tours.server";
 
 export const runtime = "nodejs";
@@ -8,7 +9,10 @@ export const runtime = "nodejs";
 const addOnSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
+  /** On a pay-on-the-day extra this is a guide price; 0 means it varies. */
   price: z.number().nonnegative(),
+  /** Third-party cost the guest settles on the day — kept out of every total. */
+  payOnDay: z.boolean().default(false),
 });
 
 const tourSchema = z.object({
@@ -19,6 +23,7 @@ const tourSchema = z.object({
   name: z.string().min(1),
   base: z.number().nonnegative(),
   min: z.number().int().min(1),
+  max: z.number().int().min(1).default(DEFAULT_MAX_GUESTS),
   order: z.number().int().optional(),
   addOns: z.array(addOnSchema).default([]),
   fareharborItemId: z

@@ -2,12 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Price, { ChargedInAud } from "./Price";
-import type { Tour } from "@/lib/tours";
+import {
+  chargeableAddOns,
+  hasFixedPrice,
+  payOnDayAddOns,
+  tourTotal,
+  type Tour,
+} from "@/lib/tours";
 import { useReveal } from "./useReveal";
 import EnquiryModal, { type EnquiryDraft } from "./EnquiryModal";
 import { FAREHARBOR_ENABLED, tourItemId } from "@/lib/fareharbor";
-
-const MAX_GUESTS = 16;
 
 export default function TourBuilder({ tours }: { tours: Tour[] }) {
   const controls = useReveal<HTMLDivElement>("controls");
@@ -28,7 +32,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     if (!next) return;
     setCurrentId(id);
     setSelected({});
-    setGuests((g) => (g < next.min ? next.min : g));
+    // Clamp into the new tour's range — switching to a smaller vehicle can
+    // put the current party size above its maximum.
+    setGuests((g) => Math.min(Math.max(g, next.min), next.max));
   }
 
   // Preselect a tour when another section (e.g. the destination carousel) asks
@@ -55,15 +61,22 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
   if (!current) return null;
 
   const selectedAddOns = current.addOns.filter((a) => selected[a.id]);
-  const total =
-    current.base * guests +
-    selectedAddOns.reduce((sum, a) => sum + a.price * guests, 0);
+  const charged = chargeableAddOns(selectedAddOns);
+  const onTheDay = payOnDayAddOns(selectedAddOns);
+  const total = tourTotal(current.base, guests, selectedAddOns);
 
+  // Handed on already split, so nothing downstream — the enquiry record, the
+  // emails, FareHarbor — can fold a third party's ticket back into our total.
   const draft: EnquiryDraft = {
     tourId: current.id,
     tourName: current.name,
     guests,
-    addOns: selectedAddOns.map((a) => ({ id: a.id, name: a.name, price: a.price })),
+    addOns: charged.map((a) => ({ id: a.id, name: a.name, price: a.price })),
+    payOnDayAddOns: onTheDay.map((a) => ({
+      id: a.id,
+      name: a.name,
+      price: a.price,
+    })),
     total,
     fareharborItemId: tourItemId(current.fareharborItemId),
   };
@@ -109,7 +122,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   type="button"
                   aria-label="More guests"
                   onClick={() =>
-                    setGuests((g) => (g < MAX_GUESTS ? g + 1 : g))
+                    setGuests((g) => (g < current.max ? g + 1 : g))
                   }
                 >
                   +
@@ -125,15 +138,34 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   return (
                     <div
                       key={a.id}
-                      className={on ? "addon on" : "addon"}
+                      className={`addon${on ? " on" : ""}${a.payOnDay ? " onday" : ""}`}
                       onClick={() => toggleAddon(a.id)}
                     >
                       <span className="left">
                         <span className="box">{on ? "✓" : ""}</span>
-                        {a.name}
+                        <span>
+                          {a.name}
+                          {a.payOnDay && (
+                            <small className="addon-note">
+                              Paid direct on the day
+                            </small>
+                          )}
+                        </span>
                       </span>
                       <span className="price">
-                        +<Price aud={a.price} /> pp
+                        {a.payOnDay ? (
+                          hasFixedPrice(a) ? (
+                            <>
+                              ~<Price aud={a.price} /> pp
+                            </>
+                          ) : (
+                            "Price varies"
+                          )
+                        ) : (
+                          <>
+                            +<Price aud={a.price} /> pp
+                          </>
+                        )}
                       </span>
                     </div>
                   );
@@ -154,7 +186,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   <Price aud={current.base * guests} />
                 </span>
               </div>
-              {selectedAddOns.map((a) => (
+              {charged.map((a) => (
                 <div className="line add" key={a.id}>
                   <span>
                     + {a.name} ×{guests}
@@ -178,6 +210,35 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
               swap in; empty and invisible for AUD visitors.
             */}
             <ChargedInAud aud={total} className="bill-charged" />
+            {/*
+              Third-party tickets and hire, kept outside the estimate above and
+              below the total line so it reads as what it is: money the guest
+              hands to someone else, on the day, not to us.
+            */}
+            {onTheDay.length > 0 && (
+              <div className="bill-onday">
+                <p className="t">Paid direct on the day</p>
+                {onTheDay.map((a) => (
+                  <div className="line add" key={a.id}>
+                    <span>{a.name}</span>
+                    <span>
+                      {hasFixedPrice(a) ? (
+                        <>
+                          ~<Price aud={a.price * guests} />
+                        </>
+                      ) : (
+                        "Varies"
+                      )}
+                    </span>
+                  </div>
+                ))}
+                <p className="bill-onday-note">
+                  Approximate, and paid straight to the provider on the day — a
+                  ticket booth or hire counter. Not included in the estimate
+                  above and not collected by us.
+                </p>
+              </div>
+            )}
             {/*
               Private tours are quoted per itinerary in FareHarbor, so this
               figure is a guide, not the price charged at checkout.
