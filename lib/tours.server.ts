@@ -1,6 +1,6 @@
 import "server-only";
 import { adminDb } from "./firebase.admin";
-import { SEED_TOURS, type Tour } from "./tours";
+import { DEFAULT_MAX_GUESTS, SEED_TOURS, type Tour } from "./tours";
 
 /**
  * Fetches tours from the Firestore `tours` collection, ordered by `order`.
@@ -18,6 +18,7 @@ export async function getTours(): Promise<Tour[]> {
         name: data.name,
         base: data.base,
         min: data.min,
+        max: data.max ?? DEFAULT_MAX_GUESTS,
         order: data.order,
         addOns: data.addOns ?? [],
         fareharborItemId: data.fareharborItemId ?? "",
