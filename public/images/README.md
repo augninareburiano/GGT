@@ -9,7 +9,7 @@ The layering is done by `mediaBg()` in [`lib/media.ts`](../../lib/media.ts).
 
 ## Showcase tours (carousel + stacking cards)
 
-Data lives in [`lib/showcase.ts`](../../lib/showcase.ts). All nine tours now
+Data lives in [`lib/showcase.ts`](../../lib/showcase.ts). All eight tours now
 point at a photo in `public/images/tours/<id>.webp`:
 
 ```ts
@@ -17,7 +17,7 @@ bg: "linear-gradient(150deg,#858d47,#35381d)",
 image: "/images/tours/hunter.webp",
 ```
 
-Tour ids: `hunter`, `beaches`, `foodie`, `jenolan`, `highlands`,
+Tour ids: `hunter`, `beaches`, `foodie`, `highlands`,
 `central-coast`, `blue-mountains-day`, `orange-mudgee`, `kangaroo-valley`.
 
 To swap one out, replace the file and keep the name — no code change needed.

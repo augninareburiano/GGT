@@ -138,18 +138,4 @@ export const SEED_TOURS: Tour[] = [
       { id: "choc", name: "Chocolate & cheese flight", price: 25 },
     ],
   },
-  {
-    id: "jenolan",
-    name: "Blue Mountains & Jenolan Overnight",
-    base: 320,
-    min: 2,
-    max: 16,
-    order: 5,
-    fareharborItemId: "65977",
-    addOns: [
-      { id: "cave", name: "Cave tour entry", price: 50 },
-      { id: "gear", name: "Camp gear & bedding", price: 40 },
-      { id: "fire", name: "Campfire dinner upgrade", price: 35 },
-    ],
-  },
 ];
