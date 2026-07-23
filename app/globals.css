@@ -176,6 +176,14 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .foot a{opacity:.8;font-size:14px;display:block;padding:4px 0}
 .foot a:hover{opacity:1;color:var(--marmalade)}
 .foot h5{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:var(--stone)}
+.foot-address{font-size:14px;font-style:normal;opacity:.8;padding:4px 0;line-height:1.45}
+
+/* accreditation badge — the trust signal, kept visible rather than buried */
+.accred{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:7px 12px;border:1px solid rgba(243,236,216,.28);border-radius:999px;background:rgba(255,255,255,.05)}
+.accred-label{font-family:var(--font-mono),'IBM Plex Mono';font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--stone)}
+.accred-no{font-weight:bold;font-size:14px;color:var(--gold)}
+
+.foot-legal{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:40px;padding-top:22px;border-top:1px solid rgba(243,236,216,.16);font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.06em;opacity:.65}
 
 /* currency picker */
 .cpick{margin-top:18px;max-width:240px}

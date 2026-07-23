@@ -2,7 +2,15 @@
 
 import { useReveal } from "./useReveal";
 import CurrencyPicker from "./CurrencyPicker";
-import { SOCIAL_LINKS } from "@/lib/seo";
+import {
+  ACCREDITATION_NUMBER,
+  BUSINESS_ACN,
+  BUSINESS_ADDRESS,
+  BUSINESS_EMAIL,
+  BUSINESS_PHONE,
+  SITE_NAME,
+  SOCIAL_LINKS,
+} from "@/lib/seo";
 import {
   bookingHref,
   flagshipBookingHref,
@@ -15,6 +23,7 @@ export default function Footer() {
   const c2 = useReveal<HTMLDivElement>();
   const c3 = useReveal<HTMLDivElement>();
   const c4 = useReveal<HTMLDivElement>();
+  const legal = useReveal<HTMLDivElement>("foot-legal");
 
   return (
     <footer>
@@ -33,6 +42,10 @@ export default function Footer() {
           >
             Food, wine &amp; adventure tours from Sydney, New South Wales.
           </p>
+          <p className="accred">
+            <span className="accred-label">Accredited tour operator</span>
+            <span className="accred-no">No. {ACCREDITATION_NUMBER}</span>
+          </p>
         </div>
         <div ref={c2.ref} className={c2.className}>
           <h5>Tours</h5>
@@ -48,13 +61,30 @@ export default function Footer() {
         </div>
         <div ref={c4.ref} className={c4.className}>
           <h5>Get in touch</h5>
-          <a href="tel:+61416139567">+61 416 139 567</a>
+          <a href={`tel:${BUSINESS_PHONE}`}>+61 416 139 567</a>
+          <a href={`mailto:${BUSINESS_EMAIL}`}>{BUSINESS_EMAIL}</a>
+          <address className="foot-address">
+            {BUSINESS_ADDRESS.street}
+            <br />
+            {BUSINESS_ADDRESS.suburb} {BUSINESS_ADDRESS.stateCode}{" "}
+            {BUSINESS_ADDRESS.postcode}
+          </address>
           {SOCIAL_LINKS.map((s) => (
             <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer">
               {s.name}
             </a>
           ))}
           <CurrencyPicker />
+        </div>
+      </div>
+      <div className="wrap">
+        <div ref={legal.ref} className={legal.className}>
+          {/* ABN still outstanding from the client — it belongs alongside the
+              ACN here once supplied. No placeholder until then. */}
+          <span>ACN {BUSINESS_ACN}</span>
+          <span>
+            &copy; {new Date().getFullYear()} {SITE_NAME}
+          </span>
         </div>
       </div>
     </footer>

@@ -11,6 +11,28 @@ export const SITE_DESCRIPTION =
 /** Business phone, mirrored from the site footer. */
 export const BUSINESS_PHONE = "+61416139567";
 
+/** Public enquiry address, mirrored from the site footer. */
+export const BUSINESS_EMAIL = "info@gourmetgetawaytours.com.au";
+
+/**
+ * Registered business identifiers shown in the footer so visitors can verify
+ * who they are dealing with. The ACN (a nine-digit company number) and the ABN
+ * are different registrations — never label one as the other. The ABN is still
+ * outstanding from the client, so it is deliberately absent rather than stubbed.
+ */
+export const ACCREDITATION_NUMBER = "40079";
+export const BUSINESS_ACN = "627 789 146";
+
+/** Registered business address, mirrored from the site footer. */
+export const BUSINESS_ADDRESS = {
+  street: "17 Allambie Rd",
+  suburb: "Allambie Heights",
+  state: "New South Wales",
+  stateCode: "NSW",
+  postcode: "2100",
+  country: "AU",
+} as const;
+
 /**
  * Social profiles — single source of truth for the footer, the "follow" band
  * and the Organization `sameAs` structured data.
@@ -47,16 +69,28 @@ export function organizationJsonLd() {
     url: SITE_URL,
     image: `${SITE_URL}/opengraph-image`,
     telephone: BUSINESS_PHONE,
+    email: BUSINESS_EMAIL,
     priceRange: "$$",
     sameAs: SOCIAL_LINKS.map((s) => s.url),
+    identifier: [
+      { "@type": "PropertyValue", name: "ACN", value: BUSINESS_ACN },
+      {
+        "@type": "PropertyValue",
+        name: "Accreditation number",
+        value: ACCREDITATION_NUMBER,
+      },
+    ],
     areaServed: {
       "@type": "State",
       name: "New South Wales",
     },
     address: {
       "@type": "PostalAddress",
-      addressRegion: "NSW",
-      addressCountry: "AU",
+      streetAddress: BUSINESS_ADDRESS.street,
+      addressLocality: BUSINESS_ADDRESS.suburb,
+      addressRegion: BUSINESS_ADDRESS.stateCode,
+      postalCode: BUSINESS_ADDRESS.postcode,
+      addressCountry: BUSINESS_ADDRESS.country,
     },
   };
 }
