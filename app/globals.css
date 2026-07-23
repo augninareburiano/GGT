@@ -10,6 +10,27 @@
   --stone:#9A9483;
   --radius:18px;
   --font:Verdana,Geneva,Tahoma,sans-serif;
+  /* Headings/display default to the body face; the type themes below split
+     them apart (e.g. serif headline over sans body). */
+  --font-display:var(--font);
+  /* Header height, in one place: the nav bar, the mobile dropdown's offset,
+     the hero's top padding and every sticky `top` are all derived from it, so
+     the bar can shrink on small viewports without any of them drifting. */
+  --nav-h:clamp(58px,6.2vw,70px);
+  /* Standard gap between full-width sections. */
+  --section:clamp(52px,7.6vw,84px);
+  /* Frosted-glass design tokens, used by the immersive home page (.nature-page).
+     One place to tune the whole glass look: fill, edge, blur, drop shadow, the
+     top highlight that gives the pane a lit rim, and the two text tones that
+     stay legible on it. */
+  --glass:rgba(255,255,255,.10);
+  --glass-strong:rgba(255,255,255,.17);
+  --glass-border:rgba(255,255,255,.22);
+  --glass-blur:blur(18px) saturate(135%);
+  --glass-shadow:0 24px 60px -28px rgba(0,0,0,.72);
+  --glass-hi:inset 0 1px 0 rgba(255,255,255,.30);
+  --on-glass:rgba(255,255,255,.94);
+  --on-glass-dim:rgba(255,255,255,.66);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -20,18 +41,33 @@ body{
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+/* Type-exploration themes (nature + glass). Set on <body> by layout.tsx and
+   flipped live by the dev-only <TypeSwitcher>. Each maps the loaded families
+   to the two roles: --font (body/UI) and --font-display (headings/motto).
+   A — editorial: Fraunces serif headlines over a Hanken humanist body.
+   B — one organic grotesque (Bricolage) for everything.
+   C — warm humanist sans (Hanken) throughout.
+   Once a direction is chosen, keep just that family and drop the rest. */
+body.type-a{--font:var(--font-hanken),system-ui,sans-serif;--font-display:var(--font-fraunces),Georgia,serif}
+body.type-b{--font:var(--font-bricolage),system-ui,sans-serif;--font-display:var(--font-bricolage),system-ui,sans-serif}
+body.type-c{--font:var(--font-hanken),system-ui,sans-serif;--font-display:var(--font-hanken),system-ui,sans-serif}
+/* D — Helvetica: the classic neutral grotesque, via the system stack (no web
+   load). E — Poppins: geometric, rounder, friendlier. Both used for headings
+   and body alike. */
+body.type-d{--font:"Helvetica Neue",Helvetica,Arial,sans-serif;--font-display:"Helvetica Neue",Helvetica,Arial,sans-serif}
+body.type-e{--font:var(--font-poppins),system-ui,sans-serif;--font-display:var(--font-poppins),system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(18px,3vw,28px)}
 .mono{font-family:var(--font-mono),'IBM Plex Mono',monospace}
 .eyebrow{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--olive)}
-h1,h2,h3,h4{font-family:var(--font);line-height:1.05;font-weight:bold;letter-spacing:-.02em}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.05;font-weight:bold;letter-spacing:-.02em}
 a{color:inherit;text-decoration:none}
 
 :focus-visible{outline:3px solid var(--marmalade);outline-offset:2px;border-radius:6px}
 
 .btn{
   display:inline-flex;align-items:center;gap:8px;cursor:pointer;
-  font-family:var(--font);font-weight:bold;font-size:15px;
-  padding:14px 22px;border-radius:999px;border:1.5px solid transparent;
+  font-family:var(--font);font-weight:bold;font-size:clamp(14px,1.15vw,15px);
+  padding:clamp(12px,1.4vw,14px) clamp(17px,2.2vw,22px);border-radius:999px;border:1.5px solid transparent;
   transition:transform .14s ease, box-shadow .14s ease, background .14s ease;
 }
 .btn:hover{transform:translateY(-2px)}
@@ -44,20 +80,58 @@ a{color:inherit;text-decoration:none}
 .btn-light:hover{background:#fff;color:var(--ink)}
 
 /* header */
-header{position:sticky;top:0;z-index:60;background:rgba(255,251,242,.88);backdrop-filter:blur(8px);border-bottom:1px solid rgba(33,28,36,.08)}
-.nav{display:flex;align-items:center;justify-content:space-between;height:70px}
-.brand{font-family:var(--font);font-weight:bold;font-size:19px;letter-spacing:-.02em}
-.brand span{color:var(--marmalade)}
-.nav-links{display:flex;gap:24px;align-items:center;font-size:14px}
-.nav-links a:not(.btn):hover{color:var(--olive)}
+header{position:sticky;top:0;z-index:60;background:rgba(255,251,242,.88);backdrop-filter:blur(8px);border-bottom:1px solid rgba(33,28,36,.08);transition:background .3s ease,border-color .3s ease,color .3s ease}
+/* Overlay mode (home page): the bar floats over the full-bleed hero rather
+   than sitting above it in its own cream band. `fixed` rather than `sticky`
+   so it takes no space in flow — the carousel starts at the top of the
+   viewport underneath it. Past the first scroll it becomes the same cream
+   glass every other page uses. */
+header.overlay{position:fixed;left:0;right:0;background:transparent;backdrop-filter:none;border-bottom-color:transparent;color:#fff}
+header.overlay.scrolled{background:rgba(255,251,242,.88);backdrop-filter:blur(8px);border-bottom-color:rgba(33,28,36,.08);color:var(--ink)}
+/* Matches .dc-inner, not the 1180px .wrap every other section uses: floating
+   over the hero, the brand has to line up with the hero kicker underneath it. */
+header.overlay .wrap{max-width:min(1520px,94vw)}
+/* Three columns, not space-between: the outer 1fr tracks are what hold the
+   links in the true centre no matter how wide the brand or the CTA get. */
+.nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(10px,1.6vw,16px);height:var(--nav-h)}
+/* The full logo image, as-is. Bigger while floating over the hero, easing back
+   to a bar-fitting size once scrolled / on the legal pages so it can't overlap
+   the content underneath. */
+.brand{display:inline-flex;align-items:center;gap:clamp(8px,1vw,12px);justify-self:start;margin-left:clamp(6px,1.8vw,24px)}
+.brand-logo{display:block;height:clamp(40px,4.6vw,52px);width:auto;transition:height .3s ease}
+header.overlay:not(.scrolled) .brand-logo{height:clamp(52px,6.6vw,72px)}
+/* Text wordmark beside the mark. Inherits the header's colour (white over the
+   hero, ink once scrolled) via currentColor; the mark carries the green. */
+.brand-word{display:inline-flex;align-items:baseline;line-height:1;color:currentColor;white-space:nowrap}
+.brand-name{font-family:var(--font-display);font-weight:bold;letter-spacing:-.01em;font-size:clamp(16px,1.9vw,21px)}
+.brand-sub{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:clamp(9px,1vw,11px);letter-spacing:.34em;text-transform:uppercase;opacity:.85}
+/* The wordmark grows a touch with the mark while floating over the hero. */
+header.overlay:not(.scrolled) .brand-name{font-size:clamp(19px,2.4vw,26px)}
+/* Drop the wordmark on very narrow screens; the mark alone carries the brand. */
+@media(max-width:420px){.brand-word{display:none}}
+/* Micro-type links, matching the mono kickers used through the carousel. */
+.nav-links{display:flex;gap:26px;align-items:center;justify-self:center;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase}
+.nav-links a:not(.btn){position:relative;padding:8px 0;opacity:.75;transition:opacity .15s ease}
+.nav-links a:not(.btn):hover{opacity:1}
+/* Marker dot under the link, riding up on hover. */
+.nav-links a:not(.btn)::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:999px;background:var(--marmalade);opacity:0;transform:translateY(3px);transition:opacity .15s ease,transform .15s ease}
+.nav-links a:not(.btn):hover::after,.nav-links a[aria-current]::after{opacity:1;transform:none}
+.nav-actions{display:flex;align-items:center;gap:10px;justify-self:end}
 .nav .btn{padding:10px 18px;font-size:13px}
-.menu-btn{display:none;background:none;border:1.5px solid var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer;font-family:var(--font-mono),'IBM Plex Mono';font-size:13px}
+.nav-cta-m{display:none}
+.menu-btn{display:none;background:none;border:1.5px solid currentColor;border-radius:10px;padding:8px 12px;cursor:pointer;color:inherit;font-family:var(--font-mono),'IBM Plex Mono';font-size:13px}
 @media(max-width:780px){
+  .nav{grid-template-columns:1fr auto}
   .menu-btn{display:block}
-  .nav-links{position:absolute;top:70px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--paper);border-bottom:1px solid rgba(33,28,36,.1);padding:8px 28px 18px;display:none}
-  .nav-links.open{display:flex}
-  .nav-links a:not(.btn){padding:12px 0;border-bottom:1px solid rgba(33,28,36,.08)}
-  .nav-links .btn{margin-top:12px;justify-content:center}
+  .nav-cta{display:none}
+  .nav-cta-m{display:inline-flex}
+  /* The dropdown is cream in every mode, so the overlay header's white type
+     has to be overridden back to ink inside it. */
+  .nav-links,header.overlay:not(.scrolled) .nav-links{position:absolute;top:var(--nav-h);left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--paper);color:var(--ink);border-bottom:1px solid rgba(33,28,36,.1);padding:8px 28px 18px;display:none;font-size:12px}
+  .nav-links.open,header.overlay:not(.scrolled) .nav-links.open{display:flex}
+  .nav-links a:not(.btn){padding:14px 0;opacity:1;border-bottom:1px solid rgba(33,28,36,.08)}
+  .nav-links a:not(.btn)::after{display:none}
+  .nav-links .btn{margin-top:14px;justify-content:center}
 }
 
 /* hero */
@@ -79,9 +153,11 @@ header{position:sticky;top:0;z-index:60;background:rgba(255,251,242,.88);backdro
 @media(max-width:780px){.hero-grid{grid-template-columns:1fr}.stack{height:340px;margin-top:8px}}
 
 /* doors */
-.doors{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:30px 0 70px}
-.door{border-radius:var(--radius);padding:30px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between}
-.door h3{font-size:24px;margin-bottom:4px}
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.6vw,18px);padding:clamp(20px,3vw,30px) 0 clamp(46px,6.4vw,70px)}
+/* Side by side is unreadable once each door is under ~250px wide. */
+@media(max-width:620px){.doors{grid-template-columns:1fr}}
+.door{border-radius:var(--radius);padding:clamp(20px,2.8vw,30px);min-height:clamp(158px,19vw,200px);display:flex;flex-direction:column;justify-content:space-between}
+.door h3{font-size:clamp(20px,2.3vw,24px);margin-bottom:4px}
 .door.a{background:var(--olive);color:#fff}
 .door.b{background:var(--sea);color:#fff}
 .door p{margin:10px 0 0;font-size:14px;opacity:.95}
@@ -108,16 +184,18 @@ header{position:sticky;top:0;z-index:60;background:rgba(255,251,242,.88);backdro
 @media(max-width:680px){.card{grid-template-columns:1fr}.card .art{min-height:160px}.card{position:relative;top:0}}
 
 /* interactive builder */
-.builder{padding:84px 0}
-.builder-title{font-size:clamp(28px,4.2vw,46px);max-width:18ch;margin:6px 0 30px}
-.builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
-.field{margin-bottom:24px}
+.builder{padding:var(--section) 0}
+.builder-title{font-size:clamp(28px,4.2vw,46px);max-width:18ch;margin:6px 0 clamp(20px,2.8vw,30px)}
+.builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3.6vw,40px);align-items:start}
+.field{margin-bottom:clamp(16px,2.2vw,24px)}
 .flabel{display:block;font-family:var(--font-mono),'IBM Plex Mono';font-size:13px;letter-spacing:.04em;color:var(--olive);margin-bottom:10px;font-weight:500}
 select{width:100%;padding:14px 16px;font-family:var(--font);font-size:16px;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;background:#fff;cursor:pointer}
-.stepper{display:inline-flex;align-items:center;gap:0;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;overflow:hidden;background:#fff}
-.stepper button{width:48px;height:48px;border:none;background:#fff;font-size:22px;cursor:pointer;color:var(--ink);transition:background .12s}
+/* One height drives the buttons and the readout's line-height, so the control
+   stays square as it scales. */
+.stepper{--step-h:clamp(42px,4.4vw,48px);display:inline-flex;align-items:center;gap:0;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;overflow:hidden;background:#fff}
+.stepper button{width:var(--step-h);height:var(--step-h);border:none;background:#fff;font-size:clamp(19px,2vw,22px);cursor:pointer;color:var(--ink);transition:background .12s}
 .stepper button:hover{background:var(--oat)}
-.stepper output{min-width:56px;text-align:center;font-family:var(--font-mono),'IBM Plex Mono';font-size:18px;border-left:1.5px solid rgba(33,28,36,.12);border-right:1.5px solid rgba(33,28,36,.12);line-height:48px}
+.stepper output{min-width:clamp(48px,5vw,56px);text-align:center;font-family:var(--font-mono),'IBM Plex Mono';font-size:clamp(16px,1.7vw,18px);border-left:1.5px solid rgba(33,28,36,.12);border-right:1.5px solid rgba(33,28,36,.12);line-height:var(--step-h)}
 .addons{display:flex;flex-direction:column;gap:10px}
 .addon{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1.5px solid rgba(33,28,36,.18);border-radius:12px;cursor:pointer;transition:border-color .12s, background .12s}
 .addon:hover{border-color:var(--olive)}
@@ -127,35 +205,35 @@ select{width:100%;padding:14px 16px;font-family:var(--font);font-size:16px;borde
 .addon.on .box{background:var(--olive);border-color:var(--olive)}
 .addon .price{font-family:var(--font-mono),'IBM Plex Mono';font-size:14px;color:var(--ink)}
 
-.bill{background:var(--olive-deep);color:var(--paper);border-radius:20px;padding:28px;box-shadow:0 30px 60px -30px rgba(0,0,0,.5);position:sticky;top:90px}
+.bill{background:var(--olive-deep);color:var(--paper);border-radius:20px;padding:clamp(20px,2.6vw,28px);box-shadow:0 30px 60px -30px rgba(0,0,0,.5);position:sticky;top:calc(var(--nav-h) + 20px)}
 .bill .t{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
 .bill h4{font-size:21px;margin:6px 0 16px}
 .line{display:flex;justify-content:space-between;gap:14px;font-family:var(--font-mono),'IBM Plex Mono';font-size:14px;padding:9px 0;border-bottom:1px dashed rgba(246,242,233,.25)}
 .line.add{opacity:.9}
 .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px}
 .total .mono{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
-.total b{font-size:32px;color:var(--marmalade)}
+.total b{font-size:clamp(26px,3.4vw,32px);color:var(--marmalade)}
 /* Height is reserved even when empty so the bill doesn't reflow when converted
    prices replace AUD after hydration. */
 .bill-charged{display:block;text-align:right;min-height:17px;margin-top:2px;font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;opacity:.75}
 @media(max-width:780px){.builder-grid{grid-template-columns:1fr}.bill{position:relative;top:0}}
 
 /* brand motto */
-.motto{text-align:center;padding:74px 0 78px;display:flex;flex-direction:column;align-items:center;gap:24px}
-.motto-line{font-family:var(--font);font-weight:bold;letter-spacing:-.02em;line-height:1.08;font-size:clamp(30px,5.4vw,60px)}
+.motto{text-align:center;padding:clamp(48px,6.8vw,74px) 0 clamp(50px,7.2vw,78px);display:flex;flex-direction:column;align-items:center;gap:clamp(16px,2.2vw,24px)}
+.motto-line{font-family:var(--font-display);font-weight:bold;letter-spacing:-.02em;line-height:1.08;font-size:clamp(30px,5.4vw,60px)}
 .motto-line em{font-style:normal;color:var(--marmalade)}
 
 /* jimmy strip */
-.jimmy{background:var(--sea);color:#fff;border-radius:24px;margin:0 0 84px;padding:46px;display:grid;grid-template-columns:1fr 1.3fr;gap:36px;align-items:center}
+.jimmy{background:var(--sea);color:#fff;border-radius:clamp(16px,2.2vw,24px);margin:0 0 var(--section);padding:clamp(24px,4.2vw,46px);display:grid;grid-template-columns:1fr 1.3fr;gap:clamp(20px,3.4vw,36px);align-items:center}
 /* .avatar background is set inline (components/JimmyStrip.tsx) so a photo can
    layer over the gradient fallback. */
-.jimmy .avatar{height:200px;border-radius:18px}
-.jimmy h2{font-size:32px;color:#fff}
+.jimmy .avatar{height:clamp(150px,19vw,200px);border-radius:18px}
+.jimmy h2{font-size:clamp(24px,3.2vw,32px);color:#fff}
 .jimmy p{margin-top:14px;opacity:.95}
 @media(max-width:680px){.jimmy{grid-template-columns:1fr}}
 
 /* social follow band */
-.social{background:var(--ink);color:var(--paper);border-radius:24px;margin:0 0 84px;padding:44px;display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap}
+.social{background:var(--ink);color:var(--paper);border-radius:clamp(16px,2.2vw,24px);margin:0 0 var(--section);padding:clamp(26px,4vw,44px);display:flex;justify-content:space-between;align-items:center;gap:clamp(18px,2.8vw,32px);flex-wrap:wrap}
 .social-copy h2{font-size:clamp(26px,3.2vw,34px);color:var(--paper);max-width:16ch}
 .social-copy p:not(.eyebrow){margin-top:12px;opacity:.85;font-size:15px;max-width:38ch}
 .social-links{display:flex;flex-direction:column;gap:12px;min-width:230px}
@@ -166,13 +244,13 @@ select{width:100%;padding:14px 16px;font-family:var(--font);font-size:16px;borde
 .s-youtube{background:#FF0000;border-color:transparent;color:#fff}
 .social-btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
 @media(max-width:680px){
-  .social{padding:32px 26px}
+  /* padding is fluid now and already lands near 26px here */
   .social-links{width:100%}
   .social-btn{justify-content:center}
 }
 
-footer{background:var(--ink);color:var(--oat);padding:54px 0}
-.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px}
+footer{background:var(--ink);color:var(--oat);padding:clamp(38px,5.6vw,54px) 0}
+.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:clamp(18px,2.4vw,24px)}
 .foot a{opacity:.8;font-size:14px;display:block;padding:4px 0}
 .foot a:hover{opacity:1;color:var(--marmalade)}
 .foot h5{font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:var(--stone)}
@@ -204,11 +282,38 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
    behind the carousel.
    Stack, bottom to top: bg layers 0 (active 1), morph clone 2, grade + grain 3,
    bottom scrim 4, copy and controls 5. */
-.dc{position:relative;height:calc(100vh - 70px);min-height:560px;overflow:hidden;background:var(--ink);color:#fff;isolation:isolate;--dc-darken:.18;--dc-grain:.13}
+/* Full viewport height, not `100vh - 70px`: the header overlays the hero
+   rather than stacking above it, so there is no band to subtract. */
+.dc{
+  position:relative;
+  /* svh, not vh: on mobile the URL bar makes 100vh taller than what's actually
+     visible, which would push the controls off the bottom of the screen. */
+  height:100svh;
+  /* Floor, not a target: below this the copy, cards and controls stop fitting,
+     so a very short window gets a hero that runs past the fold rather than a
+     crushed one. */
+  min-height:560px;
+  overflow:hidden;background:var(--ink);color:#fff;isolation:isolate;
+  --dc-darken:.18;--dc-grain:.13;
+  /* Photo softness. The showcase art is 600–1600px wide and runs full-bleed
+     across a ~1900px hero, so the smaller files upscale ~3x and go blocky —
+     a blur just over one source pixel hides that without reading as
+     out of focus. Thumbnails downscale instead of up, so they only get a
+     touch, enough to match the backdrop's texture. */
+  --dc-blur:3px;--dc-thumb-blur:1px;
+  /* Card geometry, shared by the strip width below so three cards plus their
+     gaps always add up to the visible strip — no breakpoint tiers needed. */
+  --dc-card:clamp(118px,11.6vw,180px);
+  --dc-gap:clamp(12px,1.2vw,18px);
+}
+@supports not (height:100svh){.dc{height:100vh;min-height:560px}}
 /* One grade for the whole carousel, not one per layer: mid-wipe two layers are
    on screen at once and per-layer scrims would stack, visibly double-darkening
    the columns that haven't wiped in yet. */
-.dc::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(90deg,rgba(20,16,22,.72),rgba(20,16,22,.34) 45%,rgba(20,16,22,.55)),rgba(20,16,22,var(--dc-darken))}
+/* The first layer is the top scrim: the header floats over this photo with no
+   background of its own, so the nav needs a dark band under it that a bright
+   slide can't wash out. */
+.dc::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(20,16,22,.55),rgba(20,16,22,0) 20%),linear-gradient(90deg,rgba(20,16,22,.72),rgba(20,16,22,.34) 45%,rgba(20,16,22,.55)),rgba(20,16,22,var(--dc-darken))}
 /* Film grain: inline SVG turbulence, so no extra request. */
 .dc::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;opacity:var(--dc-grain);mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23g)'/%3E%3C/svg%3E");background-size:150px 150px}
 /* Layer stack, outermost first. Each ring owns exactly one transform so they
@@ -224,26 +329,50 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .dc-bg-layer.is-active{opacity:1;z-index:1}
 /* Bleed past the frame so cursor parallax can't drag an edge into view. */
 .dc-bg-parallax{position:absolute;inset:-24px;will-change:transform}
-.dc-bg-photo{position:absolute;inset:0;background-size:cover;background-position:center;will-change:transform}
-.dc-scrim{position:absolute;left:0;right:0;bottom:0;height:180px;z-index:4;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(20,16,22,.55))}
-.dc-clone{position:absolute;display:none;z-index:2;overflow:hidden;background-size:cover;background-position:center;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);will-change:width,height,top,left}
+/* The blur is safe here: this sits inside the -24px bleed on .dc-bg-parallax,
+   so its own softened edge is well outside the visible frame. */
+.dc-bg-photo{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(var(--dc-blur));will-change:transform}
+/* Bottom scrim, also the top half of the seam bridge into the page below:
+   it fades the sharp hero photo down to the backdrop's own near-black green, so
+   the carousel and the blurred backdrop meet on the same colour instead of a
+   hard sharp-to-soft edge. The .nature-page::before gradient carries that same
+   tone a little further down and fades it out. */
+.dc-scrim{position:absolute;left:0;right:0;bottom:0;height:clamp(200px,30vh,300px);z-index:4;pointer-events:none;background:linear-gradient(180deg,transparent 12%,rgba(9,14,10,.92))}
+.dc-clone{position:absolute;display:none;z-index:2;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);will-change:width,height,top,left}
+/* The photo is a child, inset past the clone's clip box, so blurring it can't
+   feather the clone's own corners mid-morph. Its background and filter are
+   driven from JS — the blur has to travel from the card's value to the
+   backdrop's as the box grows, or the handoff pops at one end.
+   (see components/DestinationCarousel.tsx) */
+.dc-clone-photo{position:absolute;inset:-8px;background-size:cover;background-position:center}
 /* Wider than the site-wide .wrap (1180px): the carousel is full-bleed, so the
    headline can sit further left and the thumbnail strip further right without
    looking unmoored. Both edges move outward from this one value. */
-.dc-inner{position:relative;z-index:5;height:100%;max-width:min(1520px,94vw);display:flex;flex-direction:column;justify-content:center;padding-bottom:128px}
+/* The top padding is the overlaid header's 70px — without it the centred copy
+   would ride up under the nav. */
+.dc-inner{position:relative;z-index:5;height:100%;max-width:min(1520px,94vw);display:flex;flex-direction:column;justify-content:center;padding-top:var(--nav-h);padding-bottom:clamp(92px,13vh,128px)}
 
 .dc-copy-parallax{will-change:transform}
 /* 54% rather than 58% — the container got wider and the title got bigger, so
    this is what keeps the headline clear of the thumbnail strip. */
-.dc-copy{max-width:min(46ch,54%);animation:fadeUp .6s ease both}
-/* tier 1 — kicker: small, spaced, gold, with a rule to anchor it */
-.dc-region{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
-.dc-region::before{content:"";width:26px;height:2px;background:var(--gold);opacity:.9}
+/* The entrance is retimed to the morph — same 720ms, same easing as the photo
+   clone (see MORPH_MS / EASE in components/DestinationCarousel.tsx) — because
+   the copy now swaps at the start of the morph and rides in alongside the
+   growing photo rather than after it lands. */
+.dc-copy{max-width:min(46ch,54%);animation:fadeUp .72s cubic-bezier(.7,0,.2,1) both}
+/* tier 1 — kicker: small, spaced, gold, sitting under a short rule. The rule
+   stacks above the label rather than running inline with it, so the eye drops
+   down the column — rule, kicker, headline — instead of across. */
+.dc-region{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(8px,1.2vh,12px);font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:clamp(10px,.85vw,12px);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:clamp(10px,1.6vh,16px)}
+.dc-region::before{content:"";width:34px;height:2px;background:var(--gold);opacity:.9}
 /* tier 2 — the headline: dominant */
-.dc-title{font-size:clamp(34px,6vw,84px);line-height:.98;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.45)}
+.dc-title{font-family:var(--font-display);font-size:clamp(34px,6vw,84px);line-height:.98;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.45)}
 /* tier 3 — supporting copy: quieter than the headline */
-.dc-blurb{max-width:34ch;margin:18px 0 26px;font-size:15px;line-height:1.55;color:rgba(255,255,255,.78)}
+.dc-blurb{max-width:34ch;margin:clamp(12px,2vh,18px) 0 clamp(18px,3vh,26px);font-size:clamp(14px,1.15vw,15px);line-height:1.55;color:rgba(255,255,255,.78)}
 .dc-cta{display:flex;gap:12px;flex-wrap:wrap}
+/* Disc set into the leading edge of a pill button. Negative margins let it sit
+   flush inside the button's own padding instead of adding to its width. */
+.btn-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;margin:-7px 2px -7px -12px;border-radius:999px;background:#fff;color:var(--marmalade);font-size:14px;line-height:1}
 
 /* Vertical padding gives the cards' box-shadows room inside the clip box, so
    overflow:hidden (needed to clip the horizontal slide) no longer slices the
@@ -252,70 +381,79 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
    stays constant at any viewport height, instead of ballooning on tall screens
    and closing up on short ones. The 64px bottom padding is shadow room, so the
    visible card edge sits 120px up — clear of the controls at 34-80px. */
-.dc-thumbs{position:absolute;right:28px;bottom:56px;width:560px;padding:64px 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
-.dc-track{display:flex;align-items:center;gap:18px;height:auto;will-change:transform}
-.dc-thumb{position:relative;width:180px;height:252px;flex:none;border:none;padding:0;border-radius:16px;overflow:hidden;cursor:pointer;pointer-events:auto;background-size:cover;background-position:center;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease, opacity .2s ease}
-.dc-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.6))}
+/* Width is derived from the card geometry rather than fixed per breakpoint:
+   three cards, two gaps, less the 16px that lets the third card run under the
+   mask's fade the way it always has. */
+.dc-thumbs{position:absolute;right:clamp(16px,2.4vw,28px);bottom:clamp(38px,5.4vh,56px);width:calc(3 * var(--dc-card) + 2 * var(--dc-gap) - 16px);padding:clamp(40px,4.6vw,64px) 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
+.dc-track{display:flex;align-items:center;gap:var(--dc-gap);height:auto;will-change:transform}
+/* 5:7 was the ratio at all three of the old fixed sizes — as an aspect-ratio
+   it holds at every width in between. */
+.dc-thumb{position:relative;width:var(--dc-card);aspect-ratio:5/7;flex:none;border:none;padding:0;border-radius:clamp(12px,1.2vw,16px);overflow:hidden;cursor:pointer;pointer-events:auto;box-shadow:0 22px 44px -20px rgba(0,0,0,.65);transition:transform .25s ease, box-shadow .25s ease, opacity .2s ease}
+/* Inset past the card's clip box for the same reason as .dc-clone-photo. */
+.dc-thumb-photo{position:absolute;inset:-6px;background-size:cover;background-position:center;filter:blur(var(--dc-thumb-blur))}
+/* Starts higher and lands darker than it used to — the caption block is three
+   lines tall now, and the top one has to stay legible over a bright photo. */
+.dc-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 32%,rgba(0,0,0,.72))}
 .dc-thumb:hover{transform:translateY(-8px);box-shadow:0 30px 54px -20px rgba(0,0,0,.7)}
 /* the "up next" card sits slightly forward of the queued ones */
 .dc-thumb-next{box-shadow:0 26px 50px -18px rgba(0,0,0,.75),0 0 0 2px rgba(255,255,255,.5)}
 .dc-thumb-next::before{content:"Up next";position:absolute;top:10px;left:12px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.35);padding:3px 7px;border-radius:999px;backdrop-filter:blur(2px)}
-/* card tier 1 — the tour name, brightest element on the card */
-.dc-cap{position:absolute;left:16px;bottom:38px;right:14px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:14px;font-weight:500;line-height:1.25;letter-spacing:.03em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
-/* card tier 2 — the price, with a de-emphasised "from" */
+/* One bottom-anchored column rather than three separately positioned items:
+   tour names run to two lines at every card width, so a fixed offset per line
+   would collide the moment a name wrapped. */
+.dc-thumb-meta{position:absolute;left:clamp(11px,1.1vw,16px);right:clamp(10px,1vw,14px);bottom:clamp(10px,1vw,14px);z-index:1;display:flex;flex-direction:column;gap:clamp(3px,.4vw,5px);text-align:left}
+/* card tier 1 — the theme line, quietest of the three */
+.dc-thumb-region{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:clamp(8px,.72vw,9px);font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.66);text-shadow:0 1px 6px rgba(0,0,0,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* card tier 2 — the tour name, brightest element on the card */
+.dc-cap{font-family:var(--font-display);font-size:clamp(11px,1.05vw,14px);font-weight:700;line-height:1.25;letter-spacing:.02em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+/* card tier 3 — the price, with a de-emphasised "from" */
 /* nowrap: yen and peso figures are the longest of the supported currencies and
    must never wrap onto a second line if a rate moves or a tour price rises.
-   Card width is no longer a single value — 180/150/120px across the three
-   breakpoints below — so on the narrowest tier a long converted figure will
-   overflow rather than wrap. Worth eyeballing ¥ and ₱ there. */
-.dc-price{position:absolute;left:16px;bottom:14px;z-index:1;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:15px;font-weight:bold;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7);white-space:nowrap}
+   Cards scale continuously from 180px down to 118px, so at the narrow end a
+   long converted figure will overflow rather than wrap. Worth eyeballing ¥ and
+   ₱ around a 1000px viewport. */
+.dc-price{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:clamp(12px,1.1vw,15px);font-weight:bold;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7);white-space:nowrap}
 .dc-from{font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6)}
 
-.dc-controls{position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.dc-time{display:flex;align-items:center;gap:14px}
-.dc-play{width:42px;height:42px;border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.dc-controls{position:absolute;left:0;right:0;bottom:clamp(20px,3.2vh,34px);display:flex;align-items:center;justify-content:space-between;gap:clamp(12px,2vw,20px)}
+.dc-time{display:flex;align-items:center;gap:clamp(10px,1.4vw,14px)}
+.dc-play{width:clamp(34px,3.6vw,42px);height:clamp(34px,3.6vw,42px);border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
 .dc-play:hover{background:rgba(255,255,255,.2)}
-.dc-progress{position:relative;width:120px;height:3px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden}
-.dc-fill{position:absolute;inset:0;transform-origin:left;background:var(--marmalade);animation-name:dcgrow;animation-timing-function:linear;animation-fill-mode:forwards}
+.dc-progress{position:relative;width:clamp(64px,9vw,120px);height:3px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden}
+.dc-fill{position:absolute;inset:0;transform-origin:left;background:var(--gold);animation-name:dcgrow;animation-timing-function:linear;animation-fill-mode:forwards}
 @keyframes dcgrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .dc-clock{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:rgba(255,255,255,.7)}
-.dc-nav{display:flex;gap:12px}
-.dc-nav button{width:46px;height:46px;border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s ease,opacity .15s ease}
+.dc-nav{display:flex;gap:clamp(8px,1.2vw,12px)}
+.dc-nav button{width:clamp(38px,3.8vw,46px);height:clamp(38px,3.8vw,46px);border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:clamp(18px,2vw,22px);line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s ease,opacity .15s ease}
 .dc-nav button:hover{background:rgba(255,255,255,.2)}
 .dc-nav button:disabled{opacity:.4;cursor:default}
-.dc-index{display:flex;align-items:baseline;gap:6px;font-family:var(--font-mono),'IBM Plex Mono',monospace}
-.dc-index b{font-size:52px;line-height:1;letter-spacing:-.03em}
-.dc-index span{font-size:13px;color:rgba(255,255,255,.55)}
+/* Stacked and right-aligned: the big numeral reads as a display figure that
+   way, with the total tucked under it as a footnote. */
+.dc-index{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--font-mono),'IBM Plex Mono',monospace}
+.dc-index b{font-size:clamp(32px,4.4vw,52px);line-height:.92;letter-spacing:-.03em}
+.dc-index span{font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.55)}
 
-/* The enlarged headline and cards only fit side by side on wide screens.
-   Below this they'd collide, so step both back to the previous sizing. */
+/* The card strip used to step down in two fixed tiers here (180 → 150 → 120px)
+   to stay clear of the headline. --dc-card now scales continuously across the
+   same range, so only the two decisions that aren't about size are left: the
+   headline's own scale, and dropping the theme line once a card is too narrow
+   to carry three lines of type. */
 @media(max-width:1400px){
-  .dc-thumbs{width:470px}
-  .dc-thumb{width:150px;height:210px}
-  .dc-track{gap:16px}
   .dc-title{font-size:clamp(32px,5.2vw,70px)}
-  .dc-cap{left:14px;bottom:34px;right:12px;font-size:13px}
-  .dc-price{left:14px;bottom:12px;font-size:14px}
 }
-/* Narrow laptops: shrink the cards again to keep them off the headline.
-   (This band overlapped before these changes too — the strip is hidden
-   entirely below 940px, where even these no longer fit.) */
-@media(max-width:1200px){
-  .dc-thumbs{width:384px}
-  .dc-thumb{width:120px;height:168px}
-  .dc-track{gap:12px}
-  .dc-cap{left:11px;bottom:30px;right:10px;font-size:11px}
-  .dc-price{left:11px;bottom:10px;font-size:12px}
+@media(max-width:1080px){
+  .dc-thumb-region{display:none}
 }
+/* No room for the strip beside the headline below this, so the hero becomes
+   copy-only and gives back some height. Padding and control offsets are fluid
+   and already land where the old overrides put them. */
 @media(max-width:940px){
   .dc-thumbs{display:none}
-  .dc{height:74vh;min-height:460px}
+  .dc{height:74svh;min-height:460px}
   .dc-copy{max-width:38ch}
-  .dc-inner{padding-bottom:104px}
 }
 @media(max-width:560px){
   .dc-clock{display:none}
-  .dc-controls{bottom:22px}
 }
 @media(prefers-reduced-motion:reduce){
   .dc-bg-layer{transition:none}
@@ -389,15 +527,15 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 
 /* --- testimonials: postcard flip-deck (new) --- */
 /* position/z-index isolate the deck so its internal z-indexes never cover the sticky header */
-.tmns{padding:40px 0 84px;position:relative;z-index:0}
-.tmns-inner{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:44px;align-items:center}
+.tmns{padding:clamp(26px,4vw,40px) 0 var(--section);position:relative;z-index:0}
+.tmns-inner{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:clamp(26px,4vw,44px);align-items:center}
 .tmns-aside{display:flex;flex-direction:column;align-items:flex-start;gap:18px}
 .tmns-title{font-size:clamp(28px,4.2vw,44px);max-width:16ch;margin:4px 0 0}
 .tmns-lead{font-size:15px;line-height:1.6;color:#43403b;max-width:40ch}
 .tmns-badge{display:flex;align-items:center;gap:10px;font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--olive)}
 .tmns-badge .s{color:var(--gold);font-size:16px;letter-spacing:2px}
 .tmns-controls{display:flex;align-items:center;gap:12px;margin-top:2px}
-.tmns-btn{width:46px;height:46px;border-radius:999px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease}
+.tmns-btn{width:clamp(40px,4.4vw,46px);height:clamp(40px,4.4vw,46px);border-radius:999px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease}
 .tmns-btn:hover{background:var(--ink);color:var(--paper)}
 .tmns-index{font-family:var(--font-mono),monospace;font-size:13px;letter-spacing:.1em;color:var(--olive);min-width:66px;text-align:center}
 .tmns-cta{margin-top:6px}
@@ -486,4 +624,209 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
   .legal{padding:36px 0 64px}
   .legal-item{gap:14px;padding:20px}
   .legal-item p{font-size:15px}
+}
+
+/* ============================================================
+   Immersive glass theme — home page only.
+   A single fixed nature photo sits behind the whole document; every
+   section below the hero floats over it as a frosted-glass panel.
+   All of it is scoped under .nature-page (and header.overlay, which
+   only the home page uses), so the legal and admin pages keep their
+   cream / solid styling untouched.
+   Tuned through the --glass-* tokens in :root.
+   ============================================================ */
+
+/* The backdrop mirrors the carousel's active slide (components/NatureBackdrop),
+   held still while the page scrolls. The base colour prevents any flash before
+   the first photo paints. */
+.nature-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:#0b120d}
+/* Each slide's photo rides its own layer so a change can cross-fade rather than
+   snap — CSS can't tween a background-image. Blur + a slight scale turn the
+   photo into an atmospheric wash; the scale hides the soft edge the blur leaves
+   at the viewport rim. The layer's `background` is set inline to the slide's
+   showcaseBg value. */
+.nature-bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(3px);transform:scale(1.08);opacity:0;transition:opacity .8s ease;will-change:opacity}
+.nature-bg-layer.is-top{opacity:1}
+/* The dark green wash sits above both photo layers, so light text and glass
+   stay legible over any slide, and the mood barely shifts as photos change. */
+.nature-bg::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(20,30,22,.58),rgba(9,14,10,.82))}
+@media(prefers-reduced-motion:reduce){.nature-bg-layer{transition:none}}
+
+/* Light type is the default over the backdrop; sections re-assert their own
+   accents on top. */
+/* isolation:isolate makes this its own stacking context so the ::before bridge
+   can sit at z-index:-1 — above the fixed backdrop, below all the content. */
+.nature-page{position:relative;isolation:isolate;color:var(--on-glass)}
+/* Bottom half of the seam bridge. Starts at the same near-black green the hero
+   scrim fades to, so the two meet seamlessly at the carousel's edge, then fades
+   to nothing to reveal the live backdrop. Scrolls with the page, so it always
+   sits exactly on the join no matter the viewport height. */
+.nature-page::before{content:"";position:absolute;top:0;left:0;right:0;height:clamp(160px,24vh,280px);z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(9,14,10,.92),rgba(9,14,10,0))}
+.nature-page h1,.nature-page h2,.nature-page h3,.nature-page h4{color:var(--on-glass)}
+/* Headings that float straight on the backdrop (no panel behind them) get a
+   soft shadow so they hold up over the brighter patches of the photo. The ones
+   inside glass panels don't need it — their pane already separates them. */
+.nature-page .builder-title,
+.nature-page .tmns-title{text-shadow:0 2px 18px rgba(0,0,0,.45)}
+
+/* Shared pane recipe. -webkit- prefix kept for Safari, which still needs it. */
+.nature-page .door,
+.nature-page .jimmy,
+.nature-page .social,
+.nature-page .bill{
+  -webkit-backdrop-filter:var(--glass-blur);
+  backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow),var(--glass-hi);
+}
+
+/* Doors keep their olive / sea identity, now as a tint seen *through* glass
+   rather than a flat fill. */
+.nature-page .door{color:var(--on-glass)}
+.nature-page .door.a{background:linear-gradient(158deg,rgba(95,115,33,.34),rgba(255,255,255,.05))}
+.nature-page .door.b{background:linear-gradient(158deg,rgba(14,140,140,.34),rgba(255,255,255,.05))}
+.nature-page .door p{opacity:.82}
+
+/* Motto as frosted glass. The words are filled with translucent, faintly
+   cool-tinted glass and clipped to the glyphs, so the backdrop washes softly
+   through the letters instead of a solid white/orange fill. Two shades carry
+   the sentence's rhythm where the orange used to: the base words are a dimmer
+   glass, the emphasis words a brighter, clearer pane.
+   drop-shadow (not text-shadow) is what casts off transparent clipped text — a
+   faint white rim on top for the lit-glass edge, a soft dark one below to keep
+   the letters legible over the busy photo. */
+.nature-page .motto-line{
+  color:transparent;
+  background:linear-gradient(180deg,rgba(228,242,242,.72),rgba(255,255,255,.30));
+  -webkit-background-clip:text;background-clip:text;
+  text-shadow:none;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.22)) drop-shadow(0 4px 16px rgba(0,0,0,.5));
+}
+.nature-page .motto-line em{
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(210,236,231,.60));
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+}
+/* Engines without background-clip:text would render transparent text as
+   invisible — fall back to two translucent glass tones instead. */
+@supports not ((-webkit-background-clip:text) or (background-clip:text)){
+  .nature-page .motto-line{color:rgba(255,255,255,.80);background:none}
+  .nature-page .motto-line em{color:rgba(255,255,255,.98);background:none}
+}
+/* Default eyebrows are olive, which muddies on the dark backdrop — lift the
+   ones without an inline colour (motto, testimonials) to gold. The doors,
+   jimmy and social eyebrows set their own colour inline and are unaffected. */
+.nature-page .eyebrow{color:var(--gold)}
+
+/* Builder form controls: translucent panes with light type. The native select
+   popup stays a light menu, so its options must flip back to ink. */
+.nature-page .flabel{color:var(--gold)}
+.nature-page select,
+.nature-page .stepper,
+.nature-page .stepper button{
+  background:var(--glass);color:var(--on-glass);border-color:var(--glass-border);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+.nature-page select option{color:var(--ink)}
+.nature-page .stepper{overflow:hidden}
+.nature-page .stepper button:hover{background:var(--glass-strong)}
+.nature-page .stepper output{border-color:var(--glass-border)}
+.nature-page .addon{border-color:var(--glass-border);color:var(--on-glass)}
+.nature-page .addon:hover{border-color:rgba(140,170,60,.7)}
+.nature-page .addon.on{background:rgba(95,115,33,.26);border-color:rgba(140,170,60,.7)}
+.nature-page .addon .price{color:var(--on-glass)}
+.nature-page .addon .box{border-color:rgba(255,255,255,.5)}
+
+/* The bill reads as a deeper, olive-tinted pane so it still anchors the column
+   the way the solid olive-deep block used to. Its inner type is already light. */
+.nature-page .bill{background:linear-gradient(160deg,rgba(60,74,20,.46),rgba(16,22,14,.52))}
+
+/* Jimmy strip: sea tint through glass. Inner text is already white. */
+.nature-page .jimmy{background:linear-gradient(158deg,rgba(14,140,140,.34),rgba(255,255,255,.05))}
+
+/* Social band: neutral glass; the platform buttons keep their brand colours. */
+.nature-page .social{background:var(--glass)}
+
+/* Testimonials: the paper postcards stay as they are — physical props that
+   pop against the backdrop — but the surrounding aside and controls go light. */
+.nature-page .tmns-title{color:var(--on-glass)}
+.nature-page .tmns-lead{color:var(--on-glass-dim)}
+.nature-page .tmns-hint{color:var(--on-glass-dim)}
+.nature-page .tmns-badge{color:var(--gold)}
+.nature-page .tmns-index{color:var(--on-glass-dim)}
+.nature-page .tmns-btn{border-color:var(--glass-border);color:var(--on-glass)}
+.nature-page .tmns-btn:hover{background:var(--glass-strong);color:#fff}
+.nature-page .tmns-cta.btn-ghost{border-color:var(--glass-border);color:var(--on-glass)}
+.nature-page .tmns-cta.btn-ghost:hover{background:#fff;color:var(--ink)}
+
+/* Footer: darkest pane on the page, a glass base rather than solid ink. Its
+   own oat/stone type already sits light. */
+.nature-page footer{
+  background:linear-gradient(180deg,rgba(18,24,18,.34),rgba(10,14,10,.60));
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border-top:1px solid var(--glass-border);
+}
+
+/* ---- De-orange. The marmalade CTAs and accents become glass / gold to match
+   the immersive UI, scoped to the home experience (.nature-page, the carousel
+   .dc, header.overlay) so the cream legal pages keep the original accent. ---- */
+
+/* Primary buttons become frosted-glass pills. They stay *filled* (unlike the
+   outline-only .btn-light beside them in the hero) so they read as the primary
+   action without the orange. */
+.nature-page .btn-primary,
+.dc .btn-primary,
+header.overlay .btn-primary{
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  border-color:rgba(255,255,255,.30);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:0 14px 32px -16px rgba(0,0,0,.6),var(--glass-hi);
+}
+.nature-page .btn-primary:hover,
+.dc .btn-primary:hover,
+header.overlay .btn-primary:hover{
+  background:rgba(255,255,255,.27);
+  box-shadow:0 18px 38px -16px rgba(0,0,0,.62),var(--glass-hi);
+}
+/* The mobile menu opens as a cream panel, where a glass button would vanish —
+   that one CTA gets a solid olive fill instead. Higher specificity so it wins
+   over the glass rule above. */
+@media(max-width:780px){
+  header.overlay .nav-links .btn-primary{
+    background:var(--olive);border-color:transparent;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    box-shadow:0 8px 18px -8px rgba(60,74,20,.6);
+  }
+  header.overlay .nav-links .btn-primary:hover{background:#556a1e}
+}
+/* The arrow disc in the hero CTA: a dark inset with a white arrow, not
+   white-on-orange. */
+.dc .btn-badge{background:rgba(0,0,0,.26);color:#fff}
+
+/* Accents that were marmalade now use the UI's gold — the same tone as the
+   kickers, stars and progress bar — a warm highlight without the orange. */
+.nature-page .total b{color:var(--gold)}
+header.overlay .nav-links a:not(.btn)::after{background:var(--gold)}
+.nature-page .foot a:hover,
+.nature-page .foot-legal a:hover{color:var(--gold)}
+
+/* Header, scrolled: over an immersive page the cream glass bar would break the
+   spell, so it settles into dark glass instead and keeps its white type.
+   Safe to restyle here — only the home page uses header.overlay. */
+header.overlay.scrolled{
+  background:rgba(18,24,18,.55);
+  -webkit-backdrop-filter:blur(14px) saturate(130%);backdrop-filter:blur(14px) saturate(130%);
+  border-bottom-color:var(--glass-border);
+  color:#fff;
+}
+
+/* Older engines without backdrop-filter still get readable panes — the tints
+   above are semi-opaque on their own — but nudge the fills up so nothing turns
+   into unreadable near-transparent glass. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .nature-page .door,.nature-page .jimmy,.nature-page .social,
+  .nature-page .bill,.nature-page footer,header.overlay.scrolled{
+    background:rgba(16,22,16,.85);
+  }
 }
