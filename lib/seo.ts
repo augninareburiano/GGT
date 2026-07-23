@@ -16,9 +16,8 @@ export const BUSINESS_EMAIL = "info@gourmetgetawaytours.com.au";
 
 /**
  * Registered business identifiers shown in the footer so visitors can verify
- * who they are dealing with. The ACN (a nine-digit company number) and the ABN
- * are different registrations — never label one as the other. The ABN is still
- * outstanding from the client, so it is deliberately absent rather than stubbed.
+ * who they are dealing with. The client has confirmed no ABN is to be shown;
+ * the ACN is a separate, nine-digit company number, so never relabel it as one.
  */
 export const ACCREDITATION_NUMBER = "40079";
 export const BUSINESS_ACN = "627 789 146";

@@ -79,8 +79,6 @@ export default function Footer() {
       </div>
       <div className="wrap">
         <div ref={legal.ref} className={legal.className}>
-          {/* ABN still outstanding from the client — it belongs alongside the
-              ACN here once supplied. No placeholder until then. */}
           <span>ACN {BUSINESS_ACN}</span>
           <span>
             &copy; {new Date().getFullYear()} {SITE_NAME}
