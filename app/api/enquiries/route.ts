@@ -21,6 +21,12 @@ const enquirySchema = z.object({
   tourName: z.string().min(1),
   guests: z.number().int().min(1).max(100),
   addOns: z.array(addOnSchema).default([]),
+  /**
+   * Third-party extras the guest pays direct on the day. Recorded so Jimmy
+   * knows what the day involves; never part of `total`, which is what we quote
+   * and what any deposit is taken against. A price of 0 means it varies.
+   */
+  payOnDayAddOns: z.array(addOnSchema).default([]),
   total: z.number().nonnegative(),
   /** `YYYY-MM-DD`, passed straight to the FareHarbor availability calendar. */
   preferredDate: z
@@ -100,6 +106,7 @@ export async function GET(req: Request) {
       guests: v.guests,
       preferredDate: v.preferredDate ?? "",
       addOns: v.addOns ?? [],
+      payOnDayAddOns: v.payOnDayAddOns ?? [],
       total: v.total,
       status: v.status ?? "new",
       createdAt: v.createdAt?.toDate?.()?.toISOString() ?? null,
@@ -110,6 +117,29 @@ export async function GET(req: Request) {
 }
 
 type EnquiryData = z.infer<typeof enquirySchema>;
+
+type LineItem = { name: string; price: number };
+
+/** Comma-separated names, or an em dash so an empty list still reads as answered. */
+const namesLine = (items: LineItem[]) =>
+  items.length ? items.map((a) => a.name).join(", ") : "—";
+
+/**
+ * Pay-on-the-day extras with their guide prices. Never totalled — a sum here
+ * would look like an amount owed to us, which is exactly what these aren't.
+ */
+const payOnDayLine = (items: LineItem[]) =>
+  items.length
+    ? items
+        .map(
+          (a) => `${a.name} (${a.price > 0 ? `~${money(a.price)} pp` : "price varies"})`,
+        )
+        .join(", ")
+    : "—";
+
+/** Wording used wherever pay-on-the-day extras are listed. */
+const PAY_ON_DAY_NOTE =
+  "Paid direct to the provider on the day — not included in the estimate.";
 
 /** Sends a notification email via Resend, if configured. Non-fatal on failure. */
 async function sendNotification(data: EnquiryData, id: string) {
@@ -124,9 +154,6 @@ async function sendNotification(data: EnquiryData, id: string) {
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
-    const addOnsLine = data.addOns.length
-      ? data.addOns.map((a) => a.name).join(", ")
-      : "—";
 
     await resend.emails.send({
       from,
@@ -139,8 +166,11 @@ async function sendNotification(data: EnquiryData, id: string) {
         `Tour: ${data.tourName}`,
         `Guests: ${data.guests}`,
         `Preferred date: ${data.preferredDate || "—"}`,
-        `Add-ons: ${addOnsLine}`,
+        `Add-ons: ${namesLine(data.addOns)}`,
         `Estimated total: ${money(data.total)}`,
+        ``,
+        `Paid on the day: ${payOnDayLine(data.payOnDayAddOns)}`,
+        `  ${PAY_ON_DAY_NOTE}`,
         ``,
         `Name: ${data.name}`,
         `Email: ${data.email}`,
@@ -174,9 +204,6 @@ async function sendCustomerConfirmation(data: EnquiryData, id: string) {
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
-    const addOnsLine = data.addOns.length
-      ? data.addOns.map((a) => a.name).join(", ")
-      : "—";
     const firstName = data.name.trim().split(/\s+/)[0] || "there";
 
     await resend.emails.send({
@@ -194,9 +221,16 @@ async function sendCustomerConfirmation(data: EnquiryData, id: string) {
         ``,
         `Tour: ${data.tourName}`,
         `Guests: ${data.guests}`,
-        `Add-ons: ${addOnsLine}`,
+        `Add-ons: ${namesLine(data.addOns)}`,
         `Estimated total: ${money(data.total)}`,
         ``,
+        ...(data.payOnDayAddOns.length
+          ? [
+              `Paid on the day: ${payOnDayLine(data.payOnDayAddOns)}`,
+              PAY_ON_DAY_NOTE,
+              ``,
+            ]
+          : []),
         data.message ? `Your message: ${data.message}` : ``,
         ``,
         `Reference: #${id}`,
@@ -208,7 +242,7 @@ async function sendCustomerConfirmation(data: EnquiryData, id: string) {
       ]
         .filter((line) => line !== "")
         .join("\n"),
-      html: confirmationHtml(data, id, firstName, addOnsLine),
+      html: confirmationHtml(data, id, firstName),
     });
   } catch (err) {
     console.error("Customer confirmation email failed (enquiry still saved):", err);
@@ -216,12 +250,7 @@ async function sendCustomerConfirmation(data: EnquiryData, id: string) {
 }
 
 /** Builds the branded HTML body for the customer confirmation email. */
-function confirmationHtml(
-  data: EnquiryData,
-  id: string,
-  firstName: string,
-  addOnsLine: string,
-): string {
+function confirmationHtml(data: EnquiryData, id: string, firstName: string): string {
   const row = (label: string, value: string) =>
     `<tr><td style="padding:6px 0;color:#6b6b6b;">${label}</td>` +
     `<td style="padding:6px 0;text-align:right;font-weight:600;color:#1a1a1a;">${value}</td></tr>`;
@@ -244,9 +273,21 @@ function confirmationHtml(
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #eee;border-bottom:1px solid #eee;margin:0 0 20px;">
               ${row("Tour", data.tourName)}
               ${row("Guests", String(data.guests))}
-              ${row("Add-ons", addOnsLine)}
+              ${row("Add-ons", namesLine(data.addOns))}
               ${row("Estimated total", money(data.total))}
             </table>
+            ${
+              // Below the totals table on purpose: these are the guest's own
+              // costs at someone else's counter, not a line in what we quote.
+              data.payOnDayAddOns.length
+                ? `<p style="margin:0 0 20px;color:#4a4a4a;line-height:1.5;">
+                     <b>Paid on the day:</b> ${escapeHtml(
+                       payOnDayLine(data.payOnDayAddOns),
+                     )}<br>
+                     <span style="color:#8a8a8a;font-size:13px;">${PAY_ON_DAY_NOTE}</span>
+                   </p>`
+                : ""
+            }
             ${
               data.message
                 ? `<p style="margin:0 0 20px;color:#4a4a4a;line-height:1.5;"><b>Your message:</b><br>${escapeHtml(

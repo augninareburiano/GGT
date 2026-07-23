@@ -1,7 +1,7 @@
 import { mediaBg } from "./media";
 
 /**
- * The "Nine ways to spend the day" showcase tours.
+ * The "Eight ways to spend the day" showcase tours.
  *
  * Single source of truth behind the DestinationCarousel thumbnails.
  *
@@ -69,15 +69,6 @@ export const SHOWCASE_TOURS: ShowcaseTour[] = [
     fromAud: 120,
     bg: "linear-gradient(150deg,#b4ad8a,#484537)",
     image: "/images/tours/foodie.webp",
-  },
-  {
-    id: "jenolan",
-    region: "Cliffs, caves & campfire",
-    name: "Blue Mountains & Jenolan Overnight",
-    blurb: "A big day in the ranges, a night under canvas, a campfire dinner.",
-    fromAud: 320,
-    bg: "linear-gradient(150deg,#7b8c90,#31383a)",
-    image: "/images/tours/jenolan.webp",
   },
   {
     id: "highlands",

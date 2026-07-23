@@ -1,7 +1,22 @@
 export type AddOn = {
   id: string;
   name: string;
+  /**
+   * Per-person price in AUD. On a `payOnDay` extra this is the third party's
+   * approximate gate price, shown as a guide only; `0` there means "price
+   * varies" and is displayed as words rather than as a number.
+   */
   price: number;
+  /**
+   * True for a third-party cost the guest pays direct on the day — a ticket
+   * booth, a hire counter — rather than money we collect.
+   *
+   * These are never added to a quoted total. Charging for them would mean
+   * taking payment on someone else's behalf, so the split is enforced here in
+   * the data model and honoured by `tourTotal`, which is the only place a
+   * total is worked out.
+   */
+  payOnDay?: boolean;
 };
 
 /**
@@ -29,6 +44,32 @@ export type Tour = {
   fareharborItemId?: string;
 };
 
+/** Extras we charge for — everything the guest doesn't pay direct on the day. */
+export const chargeableAddOns = (addOns: AddOn[]): AddOn[] =>
+  addOns.filter((a) => !a.payOnDay);
+
+/** Extras the guest pays a third party for, on the day. */
+export const payOnDayAddOns = (addOns: AddOn[]): AddOn[] =>
+  addOns.filter((a) => a.payOnDay);
+
+/**
+ * False when a pay-on-the-day extra has no set price — bike hire billed by the
+ * hour, say. Displayed as "price varies" instead of a figure.
+ */
+export const hasFixedPrice = (a: AddOn): boolean => a.price > 0;
+
+/**
+ * The quoted estimate: base fare plus chargeable extras, per guest.
+ *
+ * The single source of the number we show, email and hand to FareHarbor, so
+ * pay-on-the-day extras are dropped once, here, rather than at each call site.
+ * Pass the full selected list — filtering is this function's job.
+ */
+export function tourTotal(base: number, guests: number, selected: AddOn[]): number {
+  const extras = chargeableAddOns(selected).reduce((sum, a) => sum + a.price, 0);
+  return (base + extras) * guests;
+}
+
 /**
  * Fallback / seed tour data — mirrors the original mockup's TOURS object.
  * Used to seed Firestore (scripts/seed-tours.ts) and as a graceful fallback
@@ -50,7 +91,10 @@ export const SEED_TOURS: Tour[] = [
     fareharborItemId: "65977",
     addOns: [
       { id: "picnic", name: "Gourmet picnic upgrade", price: 30 },
-      { id: "scenic", name: "Scenic World pass", price: 50 },
+      // Bought at the venue's own booth / hire counter, so the guest pays
+      // these direct — we only flag that they're coming.
+      { id: "scenic", name: "Scenic World pass", price: 65, payOnDay: true },
+      { id: "bike", name: "Bike hire at Hanging Rock", price: 0, payOnDay: true },
       { id: "truffle", name: "Truffle hunt (seasonal)", price: 65 },
     ],
   },
@@ -92,20 +136,6 @@ export const SEED_TOURS: Tour[] = [
     addOns: [
       { id: "fish", name: "Fish market tasting", price: 25 },
       { id: "choc", name: "Chocolate & cheese flight", price: 25 },
-    ],
-  },
-  {
-    id: "jenolan",
-    name: "Blue Mountains & Jenolan Overnight",
-    base: 320,
-    min: 2,
-    max: 16,
-    order: 5,
-    fareharborItemId: "65977",
-    addOns: [
-      { id: "cave", name: "Cave tour entry", price: 50 },
-      { id: "gear", name: "Camp gear & bedding", price: 40 },
-      { id: "fire", name: "Campfire dinner upgrade", price: 35 },
     ],
   },
 ];

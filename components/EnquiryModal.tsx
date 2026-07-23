@@ -5,11 +5,20 @@ import Price, { ChargedInAud } from "./Price";
 import { FAREHARBOR_ENABLED, type FareHarborPrefill } from "@/lib/fareharbor";
 import { openFareHarbor } from "@/lib/fareharbor.client";
 
+type DraftAddOn = { id: string; name: string; price: number };
+
 export type EnquiryDraft = {
   tourId: string;
   tourName: string;
   guests: number;
-  addOns: { id: string; name: string; price: number }[];
+  /** Extras we charge for. These, and only these, are inside `total`. */
+  addOns: DraftAddOn[];
+  /**
+   * Third-party extras the guest pays direct on the day. Carried for the
+   * record and the emails; deliberately kept out of `total`, and a `price` of
+   * 0 means it varies. Never bill against these.
+   */
+  payOnDayAddOns: DraftAddOn[];
   total: number;
   /** FareHarbor item for the selected tour, if one is configured. */
   fareharborItemId?: string;
@@ -49,6 +58,9 @@ export default function EnquiryModal({
       context: {
         tour: draft.tourName,
         extras: draft.addOns.map((a) => a.name).join(", "),
+        // Separate param, so the booking record never reads these as ours to
+        // charge. `estimate` stays the amount we quote.
+        extrasPaidOnDay: draft.payOnDayAddOns.map((a) => a.name).join(", "),
         estimate: draft.total,
       },
     };
@@ -72,6 +84,7 @@ export default function EnquiryModal({
           guests: draft.guests,
           preferredDate,
           addOns: draft.addOns,
+          payOnDayAddOns: draft.payOnDayAddOns,
           total: draft.total,
         }),
       });
@@ -153,6 +166,28 @@ export default function EnquiryModal({
                 hit the card belongs here whenever the total above is converted.
               */}
               <ChargedInAud aud={draft.total} className="summary-charged" />
+              {draft.payOnDayAddOns.length > 0 && (
+                <>
+                  {draft.payOnDayAddOns.map((a) => (
+                    <div className="row onday" key={a.id}>
+                      <span>{a.name}</span>
+                      <span>
+                        {a.price > 0 ? (
+                          <>
+                            ~<Price aud={a.price * draft.guests} />
+                          </>
+                        ) : (
+                          "Varies"
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                  <p className="summary-onday-note">
+                    Paid direct to the provider on the day — not part of the
+                    estimate and not charged by us.
+                  </p>
+                </>
+              )}
             </div>
 
             {status === "err" && (

@@ -17,6 +17,8 @@ type Enquiry = {
   guests: number;
   preferredDate: string;
   addOns: { id: string; name: string; price: number }[];
+  /** Third-party extras the guest pays direct — outside `total`. */
+  payOnDayAddOns: { id: string; name: string; price: number }[];
   total: number;
   status: "new" | "handled";
   createdAt: string | null;
@@ -180,6 +182,18 @@ export default function AdminPage() {
                 : "no add-ons"}{" "}
               · <b>{money(e.total)}</b>
             </p>
+            {e.payOnDayAddOns?.length > 0 && (
+              <p className="enq-meta" style={{ marginTop: 6 }}>
+                Pays on the day:{" "}
+                {e.payOnDayAddOns
+                  .map(
+                    (a) =>
+                      `${a.name} (${a.price > 0 ? `~${money(a.price)} pp` : "varies"})`,
+                  )
+                  .join(", ")}{" "}
+                — direct to the provider, not in the total above
+              </p>
+            )}
             {e.message && (
               <p style={{ marginTop: 8, fontSize: 14 }} className="muted">
                 “{e.message}”
@@ -288,7 +302,7 @@ function TourEditor({
       </p>
 
       {draft.addOns.map((a, i) => (
-        <div className="tour-edit" key={a.id}>
+        <div className="tour-edit addon-row" key={a.id}>
           <input
             value={a.name}
             onChange={(e) => updateAddon(i, { name: e.target.value })}
@@ -298,8 +312,16 @@ function TourEditor({
             type="number"
             value={a.price}
             onChange={(e) => updateAddon(i, { price: Number(e.target.value) })}
-            placeholder="Price"
+            placeholder={a.payOnDay ? "Approx (0 = varies)" : "Price"}
           />
+          <label className="addon-flag">
+            <input
+              type="checkbox"
+              checked={!!a.payOnDay}
+              onChange={(e) => updateAddon(i, { payOnDay: e.target.checked })}
+            />
+            Paid on the day
+          </label>
           <button
             className="btn btn-ghost"
             onClick={() =>

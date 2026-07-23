@@ -14,7 +14,7 @@ import { SHOWCASE_TOURS, showcaseBg, type ShowcaseTour } from "@/lib/showcase";
  *  2. Scroll — the thumbnail strip slides left by one card, the leading card
  *     having morphed away and a fresh card entering from the right.
  *
- * Slides are the shared "Nine ways to spend the day" tours (lib/showcase).
+ * Slides are the shared "Eight ways to spend the day" tours (lib/showcase).
  */
 const MORPH_MS = 720; // duration of both the morph and the strip slide
 const SLIDE_MS = 6000; // autoplay dwell per slide
@@ -37,7 +37,7 @@ const fmt = (s: number) =>
  *
  * Horizontally it reuses the tour's `focus` point, so the drift pushes *into*
  * the subject (the cellar door, the kangaroos) rather than the middle of a
- * paddock. Vertically it alternates, so nine consecutive slides don't all move
+ * paddock. Vertically it alternates, so consecutive slides don't all move
  * the same way.
  */
 const kenBurnsOrigin = (t: ShowcaseTour, i: number): string => {
