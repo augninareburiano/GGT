@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useReveal } from "./useReveal";
 import CurrencyPicker from "./CurrencyPicker";
 import {
@@ -51,7 +52,9 @@ export default function Footer() {
           <h5>Tours</h5>
           <a href={flagshipBookingHref()}>Wednesday Hunter Valley</a>
           <a href={bookingHref({ itemId: tourItemId() })}>Private tours</a>
-          <a href="#builder">Build your tour</a>
+          {/* Root-relative: the footer also renders on the policy pages, where
+              a bare #builder would have nothing to scroll to. */}
+          <Link href="/#builder">Build your tour</Link>
         </div>
         <div ref={c3.ref} className={c3.className}>
           <h5>Company</h5>
@@ -80,6 +83,8 @@ export default function Footer() {
       <div className="wrap">
         <div ref={legal.ref} className={legal.className}>
           <span>ACN {BUSINESS_ACN}</span>
+          <Link href="/cancellation-policy">Cancellation policy</Link>
+          <Link href="/terms-and-conditions">Terms and conditions</Link>
           <span>
             &copy; {new Date().getFullYear()} {SITE_NAME}
           </span>

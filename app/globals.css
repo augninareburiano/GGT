@@ -183,7 +183,12 @@ footer{background:var(--ink);color:var(--oat);padding:54px 0}
 .accred-label{font-family:var(--font-mono),'IBM Plex Mono';font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--stone)}
 .accred-no{font-weight:bold;font-size:14px;color:var(--gold)}
 
-.foot-legal{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:40px;padding-top:22px;border-top:1px solid rgba(243,236,216,.16);font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.06em;opacity:.65}
+/* Colour rather than opacity: the policy links live in this bar and a parent
+   opacity would cap how bright they can get. Composites the same on the ink
+   background, so the identifiers read exactly as before. */
+.foot-legal{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;margin-top:40px;padding-top:22px;border-top:1px solid rgba(243,236,216,.16);font-family:var(--font-mono),'IBM Plex Mono';font-size:12px;letter-spacing:.06em;color:rgba(243,236,216,.65)}
+.foot-legal a{color:rgba(243,236,216,.9)}
+.foot-legal a:hover{color:var(--marmalade)}
 
 /* currency picker */
 .cpick{margin-top:18px;max-width:240px}
@@ -452,4 +457,33 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 }
 @media(prefers-reduced-motion:reduce){
   .tmn{transition:none}
+}
+
+/* --- legal pages (cancellation policy, terms and conditions) --- */
+/* Narrower than the site-wide .wrap: these are read line by line, and a 1180px
+   measure is too wide to track comfortably. One clause per card so the page
+   scans as a list of obligations rather than a slab of prose. */
+.legal-shell{display:flex;flex-direction:column;min-height:100vh}
+.legal{flex:1;padding:54px 0 90px}
+.legal-inner{max-width:800px}
+.legal-title{font-size:clamp(30px,4.6vw,50px);margin:10px 0 0}
+.legal-list{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:34px;counter-reset:clause}
+.legal-item{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;background:#fff;border:1.5px solid rgba(33,28,36,.12);border-radius:16px;padding:22px 26px}
+.legal-item::before{counter-increment:clause;content:counter(clause,decimal-leading-zero);font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.06em;color:var(--olive);padding-top:2px}
+.legal-label{display:block;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:7px}
+.legal-item p{font-size:16px;line-height:1.6;color:#33302c}
+
+.legal-ids{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.legal-ids>div{display:flex;align-items:baseline;gap:9px;padding:9px 15px;border:1px solid rgba(33,28,36,.16);border-radius:999px;background:var(--oat)}
+.legal-ids dt{font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--stone)}
+.legal-ids dd{font-weight:bold;font-size:14px}
+
+.legal-more{margin-top:34px;font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.04em}
+.legal-more a{color:var(--olive);border-bottom:1.5px solid rgba(95,115,33,.35);padding-bottom:2px}
+.legal-more a:hover{color:var(--marmalade);border-bottom-color:var(--marmalade)}
+
+@media(max-width:560px){
+  .legal{padding:36px 0 64px}
+  .legal-item{gap:14px;padding:20px}
+  .legal-item p{font-size:15px}
 }
