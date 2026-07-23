@@ -54,9 +54,15 @@ export default function DestinationCarousel() {
   const [playing, setPlaying] = useState(true);
   const [elapsed, setElapsed] = useState(0);
   const [morphingId, setMorphingId] = useState<number | null>(null);
+  // The copy is driven off its own index, not `index`. `index` doesn't change
+  // until the morph finishes (finalize), so keying the copy to it made the text
+  // swap only after the photo had already landed. copyIndex is moved the instant
+  // the morph begins, so the headline animates in together with the photo.
+  const [copyIndex, setCopyIndex] = useState(0);
 
   const sectionRef = useRef<HTMLElement>(null);
   const cloneRef = useRef<HTMLDivElement>(null);
+  const clonePhotoRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const photoRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -124,26 +130,43 @@ export default function DestinationCarousel() {
     const thumb = thumbRefs.current[target];
     if (!section || !clone || !thumb) {
       setIndex(target);
+      setCopyIndex(target);
       return;
     }
 
     setAnim(true);
+    // Move the copy now, at the start of the morph, so its entrance runs while
+    // the photo grows rather than after it commits.
+    setCopyIndex(target);
     const isNext = target === (index + 1) % n;
     const sr = section.getBoundingClientRect();
     const tr = thumb.getBoundingClientRect();
 
     // 1) Morph the thumbnail out to fill the background.
+    const photo = clonePhotoRef.current;
     clone.style.transition = "none";
-    clone.style.background = showcaseBg(slides[target]);
-    clone.style.backgroundSize = "cover";
-    clone.style.backgroundPosition = "center";
+    if (photo) {
+      photo.style.transition = "none";
+      photo.style.background = showcaseBg(slides[target]);
+      photo.style.backgroundSize = "cover";
+      photo.style.backgroundPosition = "center";
+      // Starts at the card's softness and lands at the backdrop's. The blur
+      // has to travel with the box: hold either value for the whole morph and
+      // the photo visibly snaps at one end or the other.
+      photo.style.filter = "blur(var(--dc-thumb-blur))";
+    }
     clone.style.left = `${tr.left - sr.left}px`;
     clone.style.top = `${tr.top - sr.top}px`;
     clone.style.width = `${tr.width}px`;
     clone.style.height = `${tr.height}px`;
-    clone.style.borderRadius = "16px";
+    // Read rather than hardcode — the card radius is fluid now.
+    clone.style.borderRadius = getComputedStyle(thumb).borderRadius;
     clone.style.display = "block";
     void clone.offsetWidth; // reflow so the start box is registered
+    if (photo) {
+      photo.style.transition = `filter ${MORPH_MS}ms ${EASE}`;
+      photo.style.filter = "blur(var(--dc-blur))";
+    }
     clone.style.transition = [
       `left ${MORPH_MS}ms ${EASE}`,
       `top ${MORPH_MS}ms ${EASE}`,
@@ -171,6 +194,7 @@ export default function DestinationCarousel() {
     if (target === index || animatingRef.current) return;
     if (prefersReduced() || !thumbRefs.current[target]) {
       setIndex(target); // fallback: straight cut between bg layers
+      setCopyIndex(target); // and the copy cuts with it, no cross-fade
       return;
     }
     morphTo(target);
@@ -273,7 +297,19 @@ export default function DestinationCarousel() {
     return () => window.clearInterval(id);
   }, [index, playing]);
 
-  const slide = slides[index];
+  // Broadcast the active slide so the page backdrop (NatureBackdrop) can mirror
+  // whichever tour is currently playing. Fires for index 0 on mount too, which
+  // the backdrop treats as a no-op since it already starts on that slide.
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("ggt:slide", {
+        detail: { bg: showcaseBg(slides[index]) },
+      }),
+    );
+  }, [index, slides]);
+
+  // The copy tracks copyIndex, not index, so it can lead the background commit.
+  const slide = slides[copyIndex];
 
   return (
     <section className="dc" ref={sectionRef} id="destinations">
@@ -307,14 +343,18 @@ export default function DestinationCarousel() {
       {/* Bottom scrim keeps the controls legible over bright slides. */}
       <div className="dc-scrim" aria-hidden />
 
-      {/* The morphing clone lives above the background, below the UI. */}
-      <div className="dc-clone" ref={cloneRef} aria-hidden />
+      {/* The morphing clone lives above the background, below the UI. Its photo
+          is a separate inset child so the blur can't feather the clone's own
+          corners as it grows (see .dc-clone-photo). */}
+      <div className="dc-clone" ref={cloneRef} aria-hidden>
+        <div className="dc-clone-photo" ref={clonePhotoRef} />
+      </div>
 
       <div className="wrap dc-inner">
         {/* Wrapper carries the parallax so it can't collide with the fadeUp
             animation on .dc-copy, which also writes transform. */}
         <div className="dc-copy-parallax" ref={copyParallaxRef}>
-        <div className="dc-copy" key={index}>
+        <div className="dc-copy" key={copyIndex}>
           <p className="dc-region">{slide.region}</p>
           <h2 className="dc-title">{slide.name}</h2>
           <p className="dc-blurb">{slide.blurb}</p>
@@ -330,7 +370,10 @@ export default function DestinationCarousel() {
                 )
               }
             >
-              Build your tour →
+              <span className="btn-badge" aria-hidden>
+                →
+              </span>
+              Build your tour
             </a>
             <a href="#destinations" className="btn btn-light">
               Discover location
@@ -346,10 +389,7 @@ export default function DestinationCarousel() {
                 key={`${id}-${k}`}
                 type="button"
                 className={k === 0 ? "dc-thumb dc-thumb-next" : "dc-thumb"}
-                style={{
-                  background: showcaseBg(slides[id]),
-                  opacity: id === morphingId ? 0 : 1,
-                }}
+                style={{ opacity: id === morphingId ? 0 : 1 }}
                 ref={(el) => {
                   thumbRefs.current[id] = el;
                 }}
@@ -357,10 +397,19 @@ export default function DestinationCarousel() {
                 tabIndex={k >= VISIBLE ? -1 : 0}
                 aria-label={`Go to ${slides[id].name}`}
               >
-                <span className="dc-cap">{slides[id].name}</span>
-                <span className="dc-price">
-                  <span className="dc-from">from</span>{" "}
-                  <Price aud={slides[id].fromAud} />
+                {/* The photo is its own layer so the card's blur doesn't take
+                    the caption with it. */}
+                <span
+                  className="dc-thumb-photo"
+                  style={{ background: showcaseBg(slides[id]) }}
+                />
+                <span className="dc-thumb-meta">
+                  <span className="dc-thumb-region">{slides[id].region}</span>
+                  <span className="dc-cap">{slides[id].name}</span>
+                  <span className="dc-price">
+                    <span className="dc-from">from</span>{" "}
+                    <Price aud={slides[id].fromAud} />
+                  </span>
                 </span>
               </button>
             ))}
