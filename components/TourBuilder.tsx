@@ -7,8 +7,6 @@ import { useReveal } from "./useReveal";
 import EnquiryModal, { type EnquiryDraft } from "./EnquiryModal";
 import { FAREHARBOR_ENABLED, tourItemId } from "@/lib/fareharbor";
 
-const MAX_GUESTS = 16;
-
 export default function TourBuilder({ tours }: { tours: Tour[] }) {
   const controls = useReveal<HTMLDivElement>("controls");
   const bill = useReveal<HTMLDivElement>("bill");
@@ -28,7 +26,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     if (!next) return;
     setCurrentId(id);
     setSelected({});
-    setGuests((g) => (g < next.min ? next.min : g));
+    // Clamp into the new tour's range — switching to a smaller vehicle can
+    // put the current party size above its maximum.
+    setGuests((g) => Math.min(Math.max(g, next.min), next.max));
   }
 
   // Preselect a tour when another section (e.g. the destination carousel) asks
@@ -109,7 +109,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   type="button"
                   aria-label="More guests"
                   onClick={() =>
-                    setGuests((g) => (g < MAX_GUESTS ? g + 1 : g))
+                    setGuests((g) => (g < current.max ? g + 1 : g))
                   }
                 >
                   +

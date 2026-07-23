@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { adminDb, verifyAdmin } from "@/lib/firebase.admin";
+import { DEFAULT_MAX_GUESTS } from "@/lib/tours";
 import { getTours } from "@/lib/tours.server";
 
 export const runtime = "nodejs";
@@ -19,6 +20,7 @@ const tourSchema = z.object({
   name: z.string().min(1),
   base: z.number().nonnegative(),
   min: z.number().int().min(1),
+  max: z.number().int().min(1).default(DEFAULT_MAX_GUESTS),
   order: z.number().int().optional(),
   addOns: z.array(addOnSchema).default([]),
   fareharborItemId: z

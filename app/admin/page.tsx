@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase.client";
 import { money } from "@/lib/money";
-import type { Tour } from "@/lib/tours";
+import { DEFAULT_MAX_GUESTS, type Tour } from "@/lib/tours";
 
 type Enquiry = {
   id: string;
@@ -246,7 +246,7 @@ function TourEditor({
 
   return (
     <div className="card-box">
-      <div className="tour-edit">
+      <div className="tour-edit nums">
         <input
           value={draft.name}
           onChange={(e) => setDraft({ ...draft, name: e.target.value })}
@@ -263,6 +263,12 @@ function TourEditor({
           value={draft.min}
           onChange={(e) => setDraft({ ...draft, min: Number(e.target.value) })}
           placeholder="Min"
+        />
+        <input
+          type="number"
+          value={draft.max}
+          onChange={(e) => setDraft({ ...draft, max: Number(e.target.value) })}
+          placeholder="Max"
         />
       </div>
       <div className="tour-edit">
@@ -355,6 +361,7 @@ function NewTour({
       name: name.trim(),
       base: 0,
       min: 2,
+      max: DEFAULT_MAX_GUESTS,
       order: existingCount + 1,
       addOns: [],
     });

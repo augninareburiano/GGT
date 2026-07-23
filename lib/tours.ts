@@ -4,11 +4,21 @@ export type AddOn = {
   price: number;
 };
 
+/**
+ * Guest cap for a tour with none set — the 16-seat bus, which every tour
+ * currently runs on. Kept only as the fallback for tour records written
+ * before `max` existed; the real limit lives on each tour, so a second,
+ * smaller vehicle just means a lower `max` on the tours that use it.
+ */
+export const DEFAULT_MAX_GUESTS = 16;
+
 export type Tour = {
   id: string;
   name: string;
   base: number;
   min: number;
+  /** Most guests this tour can take — the capacity of the vehicle it runs on. */
+  max: number;
   addOns: AddOn[];
   /** Optional display order in the builder dropdown. */
   order?: number;
@@ -35,6 +45,7 @@ export const SEED_TOURS: Tour[] = [
     name: "Blue Mountains Day Trip",
     base: 180,
     min: 2,
+    max: 16,
     order: 1,
     fareharborItemId: "65977",
     addOns: [
@@ -48,6 +59,7 @@ export const SEED_TOURS: Tour[] = [
     name: "Hunter Valley, private",
     base: 220,
     min: 2,
+    max: 16,
     order: 2,
     fareharborItemId: "65971",
     addOns: [
@@ -61,6 +73,7 @@ export const SEED_TOURS: Tour[] = [
     name: "Sydney Beaches & Brewery",
     base: 160,
     min: 2,
+    max: 16,
     order: 3,
     fareharborItemId: "65977",
     addOns: [
@@ -73,6 +86,7 @@ export const SEED_TOURS: Tour[] = [
     name: "Half-Day Sydney Foodie",
     base: 120,
     min: 2,
+    max: 16,
     order: 4,
     fareharborItemId: "65977",
     addOns: [
@@ -85,6 +99,7 @@ export const SEED_TOURS: Tour[] = [
     name: "Blue Mountains & Jenolan Overnight",
     base: 320,
     min: 2,
+    max: 16,
     order: 5,
     fareharborItemId: "65977",
     addOns: [

@@ -369,6 +369,8 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
 .login-box .field{margin-bottom:16px}
 .login-box input{width:100%;padding:12px 14px;font-family:var(--font);font-size:15px;border:1.5px solid rgba(33,28,36,.2);border-radius:12px;background:#fff}
 .tour-edit{display:grid;grid-template-columns:1fr 90px 70px;gap:10px;align-items:center;margin-bottom:8px}
+/* the name/base/min/max row needs a fourth column; add-on rows keep three */
+.tour-edit.nums{grid-template-columns:1fr 90px 70px 70px}
 .tour-edit input{padding:10px 12px;font-family:var(--font);font-size:14px;border:1.5px solid rgba(33,28,36,.2);border-radius:10px}
 .muted{color:var(--stone);font-size:14px}
 
