@@ -15,8 +15,10 @@ export const DEFAULT_MAX_GUESTS = 16;
 export type Tour = {
   id: string;
   name: string;
-  base: number;
-  min: number;
+  /** Absent for showcase-only tours that aren't priced or booked directly. */
+  base?: number;
+  /** Absent where group size is negotiated per private tour rather than fixed. */
+  min?: number;
   /** Most guests this tour can take — the capacity of the vehicle it runs on. */
   max: number;
   addOns: AddOn[];
@@ -27,10 +29,18 @@ export type Tour = {
    * opens that item directly; when empty it opens the full item list.
    */
   fareharborItemId?: string;
+  /** Pickup window, e.g. "6:30-7:10am". */
+  startTime?: string;
+  /** Return time and/or drop-off point, e.g. "~5:52pm Circular Quay". */
+  returnTime?: string;
+  /** Where guests are picked up, e.g. "Selected Sydney city hotels". */
+  pickupLocation?: string;
+  /** What's included on the day, shown as a list. */
+  inclusions?: string[];
 };
 
 /**
- * Fallback / seed tour data — mirrors the original mockup's TOURS object.
+ * Fallback / seed tour data.
  * Used to seed Firestore (scripts/seed-tours.ts) and as a graceful fallback
  * when Firestore is empty or unreachable.
  *
@@ -43,11 +53,18 @@ export const SEED_TOURS: Tour[] = [
   {
     id: "blue-mountains-day",
     name: "Blue Mountains Day Trip",
-    base: 180,
-    min: 2,
     max: 16,
     order: 1,
     fareharborItemId: "65977",
+    startTime: "6:30-7:10am",
+    pickupLocation: "Selected Sydney city hotels",
+    returnTime: "~5:52pm Circular Quay or 6:15pm Darling Harbour",
+    inclusions: [
+      "Light cooked breakfast",
+      "Cider tasting and hot apple pie",
+      "Progressive lunch from local produce",
+      "Circle loop across the mountains",
+    ],
     addOns: [
       { id: "picnic", name: "Gourmet picnic upgrade", price: 30 },
       { id: "scenic", name: "Scenic World pass", price: 50 },
@@ -71,11 +88,11 @@ export const SEED_TOURS: Tour[] = [
   {
     id: "beaches-brewery",
     name: "Sydney Beaches & Brewery",
-    base: 160,
-    min: 2,
     max: 16,
     order: 3,
     fareharborItemId: "65977",
+    startTime: "6:30-7:00am",
+    returnTime: "After 5pm, Circular Quay",
     addOns: [
       { id: "paddle", name: "Brewery tasting paddle", price: 30 },
       { id: "surf", name: "Surf lesson", price: 70 },
@@ -107,5 +124,36 @@ export const SEED_TOURS: Tour[] = [
       { id: "gear", name: "Camp gear & bedding", price: 40 },
       { id: "fire", name: "Campfire dinner upgrade", price: 35 },
     ],
+  },
+  {
+    id: "central-coast",
+    name: "Central Coast",
+    max: 16,
+    startTime: "7:00am",
+    pickupLocation: "Yowie Bay",
+    returnTime: "Approximately 4:00pm",
+    inclusions: [
+      "Breakfast at Brooklyn",
+      "Sushi rolling class",
+      "Mushroom farm tour",
+      "Seafood BBQ lunch with wine",
+      "Chocolate factory tour",
+    ],
+    addOns: [],
+  },
+  {
+    id: "hawkesbury",
+    name: "Hawkesbury",
+    max: 16,
+    startTime: "10:00am",
+    pickupLocation: "Yowie Bay",
+    returnTime: "Approximately 6:00pm",
+    inclusions: [
+      "Wine tasting at Tizzana Winery",
+      "BBQ lunch by the Hawkesbury River",
+      "Scones and tea at Australia's oldest church",
+      "Sackville Ferry crossing",
+    ],
+    addOns: [],
   },
 ];

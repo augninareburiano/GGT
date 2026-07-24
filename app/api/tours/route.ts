@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { adminDb, verifyAdmin } from "@/lib/firebase.admin";
 import { DEFAULT_MAX_GUESTS } from "@/lib/tours";
@@ -18,8 +19,8 @@ const tourSchema = z.object({
     .min(1)
     .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers and dashes only."),
   name: z.string().min(1),
-  base: z.number().nonnegative(),
-  min: z.number().int().min(1),
+  base: z.number().nonnegative().optional(),
+  min: z.number().int().min(1).optional(),
   max: z.number().int().min(1).default(DEFAULT_MAX_GUESTS),
   order: z.number().int().optional(),
   addOns: z.array(addOnSchema).default([]),
@@ -50,8 +51,16 @@ export async function PUT(req: Request) {
     );
   }
 
-  const { id, ...rest } = parsed.data;
-  await adminDb().collection("tours").doc(id).set(rest, { merge: true });
+  const { id, base, min, ...rest } = parsed.data;
+  // Firestore rejects `undefined` field values, and a merge write silently
+  // keeps whatever was already there for a field it's not given — so an
+  // admin clearing base/min needs an explicit delete, not just an omission.
+  const doc = {
+    ...rest,
+    base: base ?? FieldValue.delete(),
+    min: min ?? FieldValue.delete(),
+  };
+  await adminDb().collection("tours").doc(id).set(doc, { merge: true });
   return NextResponse.json({ ok: true, id });
 }
 

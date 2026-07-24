@@ -119,13 +119,17 @@ export function toursJsonLd(tours: Tour[]) {
         name: tour.name,
         url: `${SITE_URL}/#builder`,
         provider: { "@id": `${SITE_URL}/#organization` },
-        offers: {
-          "@type": "Offer",
-          price: tour.base,
-          priceCurrency: "AUD",
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/#builder`,
-        },
+        // Showcase tours have no confirmed price — a $0 or null Offer is
+        // worse than omitting it, so it's only included when base is set.
+        ...(tour.base != null && {
+          offers: {
+            "@type": "Offer",
+            price: tour.base,
+            priceCurrency: "AUD",
+            availability: "https://schema.org/InStock",
+            url: `${SITE_URL}/#builder`,
+          },
+        }),
       },
     })),
   };

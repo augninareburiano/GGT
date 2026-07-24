@@ -254,15 +254,25 @@ function TourEditor({
         />
         <input
           type="number"
-          value={draft.base}
-          onChange={(e) => setDraft({ ...draft, base: Number(e.target.value) })}
-          placeholder="Base"
+          value={draft.base ?? ""}
+          onChange={(e) =>
+            setDraft({
+              ...draft,
+              base: e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+          placeholder="Base (blank = no price, showcase only)"
         />
         <input
           type="number"
-          value={draft.min}
-          onChange={(e) => setDraft({ ...draft, min: Number(e.target.value) })}
-          placeholder="Min"
+          value={draft.min ?? ""}
+          onChange={(e) =>
+            setDraft({
+              ...draft,
+              min: e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+          placeholder="Min (blank = negotiated)"
         />
         <input
           type="number"

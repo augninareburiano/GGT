@@ -27,8 +27,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
     setCurrentId(id);
     setSelected({});
     // Clamp into the new tour's range — switching to a smaller vehicle can
-    // put the current party size above its maximum.
-    setGuests((g) => Math.min(Math.max(g, next.min), next.max));
+    // put the current party size above its maximum. Showcase tours have no
+    // fixed minimum, so fall back to 1.
+    setGuests((g) => Math.min(Math.max(g, next.min ?? 1), next.max));
   }
 
   // Preselect a tour when another section (e.g. the destination carousel) asks
@@ -60,8 +61,9 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
   const isWineTour = current.id === "hunter-valley";
 
   const selectedAddOns = current.addOns.filter((a) => selected[a.id]);
+  // Showcase tours (all but Hunter Valley) carry no base price.
   const total =
-    current.base * guests +
+    (current.base ?? 0) * guests +
     selectedAddOns.reduce((sum, a) => sum + a.price * guests, 0);
 
   const draft: EnquiryDraft = {
@@ -118,7 +120,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   type="button"
                   aria-label="Fewer guests"
                   onClick={() =>
-                    setGuests((g) => (g > current.min ? g - 1 : g))
+                    setGuests((g) => (g > (current.min ?? 1) ? g - 1 : g))
                   }
                 >
                   −
@@ -170,7 +172,7 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   Base · {guests} guest{guests > 1 ? "s" : ""}
                 </span>
                 <span>
-                  <Price aud={current.base * guests} />
+                  <Price aud={(current.base ?? 0) * guests} />
                 </span>
               </div>
               {selectedAddOns.map((a) => (

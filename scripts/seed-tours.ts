@@ -11,7 +11,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { SEED_TOURS } from "../lib/tours";
 
 // Minimal .env.local loader (so the script works without extra deps).
@@ -48,8 +48,15 @@ async function main() {
   const db = getFirestore();
 
   const batch = db.batch();
-  for (const { id, ...rest } of SEED_TOURS) {
-    batch.set(db.collection("tours").doc(id), rest, { merge: true });
+  for (const { id, base, min, ...rest } of SEED_TOURS) {
+    // A merge write leaves fields absent from `rest` untouched, so a tour
+    // that previously had a placeholder base/min needs an explicit delete,
+    // not just an omission, to actually clear it.
+    batch.set(
+      db.collection("tours").doc(id),
+      { ...rest, base: base ?? FieldValue.delete(), min: min ?? FieldValue.delete() },
+      { merge: true },
+    );
   }
   await batch.commit();
 
