@@ -119,13 +119,19 @@ export function toursJsonLd(tours: Tour[]) {
         name: tour.name,
         url: `${SITE_URL}/#builder`,
         provider: { "@id": `${SITE_URL}/#organization` },
-        offers: {
-          "@type": "Offer",
-          price: tour.base,
-          priceCurrency: "AUD",
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/#builder`,
-        },
+        // Private tours are quoted by enquiry — no confirmed price, and a $0
+        // or null Offer is worse than omitting it. Hunter Valley is the only
+        // tour with its own price; its adult rate stands in as "the" price
+        // since Offer has no clean way to express three age-tier rates.
+        ...(tour.priceAdult != null && {
+          offers: {
+            "@type": "Offer",
+            price: tour.priceAdult,
+            priceCurrency: "AUD",
+            availability: "https://schema.org/InStock",
+            url: `${SITE_URL}/#builder`,
+          },
+        }),
       },
     })),
   };

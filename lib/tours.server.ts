@@ -13,15 +13,14 @@ export async function getTours(): Promise<Tour[]> {
     if (snap.empty) return SEED_TOURS;
     return snap.docs.map((d) => {
       const data = d.data();
+      // Spread rather than list fields by hand — the field list has gone
+      // stale before (this is the second pricing-shape change) and a
+      // hand-copied list silently drops whatever's newest.
       return {
+        ...data,
         id: d.id,
-        name: data.name,
-        base: data.base,
-        min: data.min,
         max: data.max ?? DEFAULT_MAX_GUESTS,
-        order: data.order,
         addOns: data.addOns ?? [],
-        fareharborItemId: data.fareharborItemId ?? "",
       } as Tour;
     });
   } catch (err) {

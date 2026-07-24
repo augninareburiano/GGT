@@ -252,17 +252,56 @@ function TourEditor({
           onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           placeholder="Tour name"
         />
+        {draft.id === "hunter-valley" && (
+          <>
+            <input
+              type="number"
+              value={draft.priceAdult ?? ""}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  priceAdult:
+                    e.target.value === "" ? undefined : Number(e.target.value),
+                })
+              }
+              placeholder="Adult price"
+            />
+            <input
+              type="number"
+              value={draft.priceSenior ?? ""}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  priceSenior:
+                    e.target.value === "" ? undefined : Number(e.target.value),
+                })
+              }
+              placeholder="Senior price"
+            />
+            <input
+              type="number"
+              value={draft.priceChild ?? ""}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  priceChild:
+                    e.target.value === "" ? undefined : Number(e.target.value),
+                })
+              }
+              placeholder="Child/student (5-17) price"
+            />
+          </>
+        )}
         <input
           type="number"
-          value={draft.base}
-          onChange={(e) => setDraft({ ...draft, base: Number(e.target.value) })}
-          placeholder="Base"
-        />
-        <input
-          type="number"
-          value={draft.min}
-          onChange={(e) => setDraft({ ...draft, min: Number(e.target.value) })}
-          placeholder="Min"
+          value={draft.min ?? ""}
+          onChange={(e) =>
+            setDraft({
+              ...draft,
+              min: e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+          placeholder="Min (blank = negotiated)"
         />
         <input
           type="number"
@@ -359,8 +398,6 @@ function NewTour({
     onSave({
       id: slug,
       name: name.trim(),
-      base: 0,
-      min: 2,
       max: DEFAULT_MAX_GUESTS,
       order: existingCount + 1,
       addOns: [],
