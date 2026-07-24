@@ -54,6 +54,11 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
 
   if (!current) return null;
 
+  // Hunter Valley is the only tour whose base price includes cellar-door
+  // wine tasting (plus the "Extra winery" add-on) — surface the age
+  // requirement as soon as it's selected, not just in the terms page.
+  const isWineTour = current.id === "hunter-valley";
+
   const selectedAddOns = current.addOns.filter((a) => selected[a.id]);
   const total =
     current.base * guests +
@@ -90,6 +95,20 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
                   </option>
                 ))}
               </select>
+              {isWineTour && (
+                <p
+                  className="muted"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    marginTop: 8,
+                    paddingTop: 8,
+                    borderTop: "1px solid rgba(255,255,255,0.15)",
+                  }}
+                >
+                  Guests must be 18 or older to taste wine.
+                </p>
+              )}
             </div>
 
             <div className="field">
