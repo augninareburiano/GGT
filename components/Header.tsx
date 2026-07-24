@@ -68,9 +68,6 @@ export default function Header({ overlay = false }: { overlay?: boolean }) {
           <a href={bookingHref({ itemId: tourItemId() })} onClick={closeMenu}>
             Private Tours
           </a>
-          <a href="#" onClick={closeMenu}>
-            About
-          </a>
           {/* The bar's own CTA is hidden on narrow screens, where it would
               crowd the brand and the menu button — this one takes over inside
               the dropdown instead. */}

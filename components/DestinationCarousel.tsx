@@ -356,7 +356,12 @@ export default function DestinationCarousel() {
         <div className="dc-copy-parallax" ref={copyParallaxRef}>
         <div className="dc-copy" key={copyIndex}>
           <p className="dc-region">{slide.region}</p>
-          <h2 className="dc-title">{slide.name}</h2>
+          {/* Styled text, not a heading. It sits above the page's H1 in the
+              DOM and rewrites itself on every slide change, so as a heading it
+              both broke the outline order and gave the document a moving one.
+              .dc-title carries the whole look; only the bold the h1–h4 rule
+              used to supply had to move into it. */}
+          <p className="dc-title">{slide.name}</p>
           <p className="dc-blurb">{slide.blurb}</p>
           <div className="dc-cta">
             <a
