@@ -35,3 +35,4 @@ next-env.d.ts
 serviceAccount.json
 .firebase/
 firebase-debug.log
+tours-backup-*.json
