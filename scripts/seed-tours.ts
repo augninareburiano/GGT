@@ -48,13 +48,19 @@ async function main() {
   const db = getFirestore();
 
   const batch = db.batch();
-  for (const { id, base, min, ...rest } of SEED_TOURS) {
+  for (const { id, priceAdult, priceSenior, priceChild, min, ...rest } of SEED_TOURS) {
     // A merge write leaves fields absent from `rest` untouched, so a tour
-    // that previously had a placeholder base/min needs an explicit delete,
+    // that previously had a placeholder price/min needs an explicit delete,
     // not just an omission, to actually clear it.
     batch.set(
       db.collection("tours").doc(id),
-      { ...rest, base: base ?? FieldValue.delete(), min: min ?? FieldValue.delete() },
+      {
+        ...rest,
+        priceAdult: priceAdult ?? FieldValue.delete(),
+        priceSenior: priceSenior ?? FieldValue.delete(),
+        priceChild: priceChild ?? FieldValue.delete(),
+        min: min ?? FieldValue.delete(),
+      },
       { merge: true },
     );
   }

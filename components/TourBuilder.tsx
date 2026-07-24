@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Price, { ChargedInAud } from "./Price";
+import Price from "./Price";
 import type { Tour } from "@/lib/tours";
 import { useReveal } from "./useReveal";
 import EnquiryModal, { type EnquiryDraft } from "./EnquiryModal";
@@ -61,17 +61,18 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
   const isWineTour = current.id === "hunter-valley";
 
   const selectedAddOns = current.addOns.filter((a) => selected[a.id]);
-  // Showcase tours (all but Hunter Valley) carry no base price.
-  const total =
-    (current.base ?? 0) * guests +
-    selectedAddOns.reduce((sum, a) => sum + a.price * guests, 0);
+  // No tour has a computable total any more: Hunter Valley is priced per
+  // age tier (this stepper only tracks one guest count) and every other
+  // tour is quoted per itinerary by enquiry. This is provisional — the
+  // builder is being converted to a non-interactive showcase shortly.
+  const extrasTotal = selectedAddOns.reduce((sum, a) => sum + a.price * guests, 0);
 
   const draft: EnquiryDraft = {
     tourId: current.id,
     tourName: current.name,
     guests,
     addOns: selectedAddOns.map((a) => ({ id: a.id, name: a.name, price: a.price })),
-    total,
+    total: extrasTotal,
     fareharborItemId: tourItemId(current.fareharborItemId),
   };
 
@@ -169,43 +170,24 @@ export default function TourBuilder({ tours }: { tours: Tour[] }) {
             <div>
               <div className="line">
                 <span>
-                  Base · {guests} guest{guests > 1 ? "s" : ""}
-                </span>
-                <span>
-                  <Price aud={(current.base ?? 0) * guests} />
+                  {guests} guest{guests > 1 ? "s" : ""}
                 </span>
               </div>
               {selectedAddOns.map((a) => (
                 <div className="line add" key={a.id}>
-                  <span>
-                    + {a.name} ×{guests}
-                  </span>
-                  <span>
-                    <Price aud={a.price * guests} />
-                  </span>
+                  <span>+ {a.name}</span>
                 </div>
               ))}
             </div>
-            <div className="total">
-              <span className="mono">Estimate</span>
-              {/* key changes on total → remount re-runs the bump animation */}
-              <b key={total} className="bill-bump">
-                <Price aud={total} />
-              </b>
-            </div>
             {/*
-              The amount actually charged, when the figure above isn't in AUD.
-              Always rendered so the card doesn't reflow once converted prices
-              swap in; empty and invisible for AUD visitors.
-            */}
-            <ChargedInAud aud={total} className="bill-charged" />
-            {/*
-              Private tours are quoted per itinerary in FareHarbor, so this
-              figure is a guide, not the price charged at checkout.
+              No live total: Hunter Valley is priced per age tier (adult /
+              senior / child), which this single guest-count stepper can't
+              represent, and every other tour is quoted per itinerary by
+              enquiry. Pricing is confirmed once Jimmy has the details.
             */}
             <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
-              A guide only — pick-up point and itinerary change the final price,
-              which is confirmed when you book.
+              Pricing is confirmed when you enquire — send us your day and
+              we&rsquo;ll get back to you with the cost.
             </p>
             <button
               type="button"
