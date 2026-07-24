@@ -58,7 +58,6 @@ export default function Footer() {
         </div>
         <div ref={c3.ref} className={c3.className}>
           <h5>Company</h5>
-          <a href="#">About Jimmy</a>
           <a href="#">FAQ</a>
           <a href={giftBookingHref()}>Gift cards</a>
         </div>

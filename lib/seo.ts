@@ -8,6 +8,15 @@ export const SITE_NAME = "Gourmet Getaway Tours";
 export const SITE_DESCRIPTION =
   "Owner-operated food, wine and adventure tours across New South Wales. Pick the place, set your group, choose your extras — and watch the price add up as you go.";
 
+/**
+ * Home page meta description. Deliberately narrower than SITE_DESCRIPTION,
+ * which stays broad because it describes the business itself in the
+ * Organization JSON-LD. This one leads with the search phrase the home page
+ * is meant to rank for, mirroring its H1/H2 pair.
+ */
+export const HOME_DESCRIPTION =
+  "Hunter Valley food and wine tours from Sydney, NSW. Owner-operated small-group and private day tours — meals cooked by your guide, wines matched to the menu, door to door.";
+
 /** Business phone, mirrored from the site footer. */
 export const BUSINESS_PHONE = "+61416139567";
 

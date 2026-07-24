@@ -220,17 +220,292 @@ select{width:100%;padding:14px 16px;font-family:var(--font);font-size:16px;borde
 
 /* brand motto */
 .motto{text-align:center;padding:clamp(48px,6.8vw,74px) 0 clamp(50px,7.2vw,78px);display:flex;flex-direction:column;align-items:center;gap:clamp(16px,2.2vw,24px)}
+/* Brand over strapline, grouped so .motto's own flex gap can't push the pair
+   apart — they read as one heading block, not two stacked lines. */
+.motto-heads{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1vw,12px)}
+/* The h1 borrows .eyebrow wholesale (mono, tracked, gold on the backdrop —
+   all of which outrank the h1–h4 rule on specificity). Only the global bold
+   has to be undone, so it sits at the weight the old <p> kicker did. */
+.motto-brand{font-weight:400}
+.motto-kicker{font-size:clamp(17px,2vw,22px);font-weight:500;line-height:1.3;max-width:26ch;letter-spacing:0}
 .motto-line{font-family:var(--font-display);font-weight:bold;letter-spacing:-.02em;line-height:1.08;font-size:clamp(30px,5.4vw,60px)}
 .motto-line em{font-style:normal;color:var(--marmalade)}
 
-/* jimmy strip */
-.jimmy{background:var(--sea);color:#fff;border-radius:clamp(16px,2.2vw,24px);margin:0 0 var(--section);padding:clamp(24px,4.2vw,46px);display:grid;grid-template-columns:1fr 1.3fr;gap:clamp(20px,3.4vw,36px);align-items:center}
+/* jimmy — a scrapbook spread laid on the nature backdrop: a frosted-glass
+   record card, a strip of three paper prints pinned beside it, and a rubber
+   stamp across the join. The card is glass so the landscape still shows through
+   the section (the ink slab it replaced sat on the page like a hole); the
+   prints stay opaque paper so they read as objects on top of it.
+   Jimmy's print is the middle one and the only one that breaks left across the
+   card — size, tilt and overlap are what make him the subject. */
+.jimmy{margin:0 0 var(--section);padding:clamp(10px,2vw,24px) 0 clamp(20px,3vw,36px)}
+
+/* Running heads, pinned to the corners the way a contact sheet is annotated. */
+.jimmy-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;padding-bottom:clamp(10px,1.6vw,16px);border-bottom:1px solid rgba(255,255,255,.18)}
+.jimmy-place{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--on-glass-dim)}
+/* Award and press marks, holding the band the "Hi, I'm Jimmy." headline used to
+   fill — same vertical rhythm it had, between the running heads and the spread.
+   The logos sit straight on the backdrop with no tile behind them. */
+.trust{margin:clamp(20px,3.4vw,40px) 0 clamp(26px,4vw,50px)}
+.trust-title{text-align:center;margin-bottom:clamp(16px,2.2vw,26px)}
+.trust-row{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,2.2vw,30px);align-items:center}
+/* The shadow lives on the tile, not the artwork. `filter` is a single property,
+   so putting both here would mean repeating the knockout's brightness/invert
+   pair in every hover branch just to keep it from being wiped. Split across the
+   two elements they compose instead of competing: the child's filter renders
+   first, the parent's drop-shadow is then cast from that result — which is why
+   the knocked-out marks get a shadow of their white silhouette, not their
+   original near-black one. */
+.trust-tile{
+  display:flex;align-items:center;justify-content:center;height:100%;
+  padding:clamp(4px,.8vw,10px);
+  filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));
+  transition:transform .35s cubic-bezier(.2,.7,.2,1),filter .35s ease;
+}
+/* Every mark lifts, not just the linked one — scoping this to `a.trust-tile`
+   left three of the four dead under the cursor. Only Tripadvisor actually goes
+   anywhere, so the pointer cursor (which comes with the anchor) stays the thing
+   that marks it as clickable.
+   Under the cursor the drop deepens and a faint gold halo comes up behind the
+   mark — the page's own accent, so the lift reads as lit rather than moved. */
+.trust-tile:hover{
+  transform:translateY(-6px) scale(1.05);
+  filter:drop-shadow(0 8px 22px rgba(0,0,0,.62)) drop-shadow(0 0 16px rgba(244,180,0,.38));
+}
+.trust-tile img{width:100%;height:auto;max-width:clamp(150px,15.5vw,210px)}
+/* Tripadvisor and Destination NSW are near-black artwork and sink into the
+   backdrop, so they're flattened to solid white — their inner detail (the owl's
+   eyes, the gaps in the NSW sails) is transparent, so it survives as counters.
+   Viator is deliberately not knocked out: it's a solid green ticket that
+   already reads, and flattening it would take the white text inside with it. */
+.trust-tile.is-knockout img{filter:brightness(0) invert(1)}
+
+/* Entrance. The marks deal in one after another once the section scrolls into
+   view — `.jimmy` is the reveal target, so `.in` is already the signal and no
+   observer of their own is needed. Held at opacity 0 until then, which matches
+   how every other revealed block on the page behaves without JS. */
+.trust-title,.trust-row li{opacity:0;transform:translateY(16px)}
+.jimmy.in .trust-title,.jimmy.in .trust-row li{animation:trustIn .62s cubic-bezier(.2,.7,.2,1) forwards}
+.jimmy.in .trust-row li:nth-child(1){animation-delay:.10s}
+.jimmy.in .trust-row li:nth-child(2){animation-delay:.20s}
+.jimmy.in .trust-row li:nth-child(3){animation-delay:.30s}
+.jimmy.in .trust-row li:nth-child(4){animation-delay:.40s}
+@keyframes trustIn{to{opacity:1;transform:none}}
+/* Four across gets cramped on a phone — two rows of two keeps them readable. */
+@media(max-width:560px){.trust-row{grid-template-columns:repeat(2,1fr);gap:clamp(18px,5vw,30px)}}
+@media(prefers-reduced-motion:reduce){
+  .trust-tile{transition:none}
+  .trust-tile:hover{transform:none}
+  .trust-title,.trust-row li{opacity:1;transform:none;animation:none}
+}
+
+/* The spread sits off the left margin, so the whole composition reads as
+   pushed to the right of the page rather than centred in it. */
+.jimmy-scrap{
+  display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);
+  gap:clamp(20px,3.2vw,48px);align-items:center;
+  padding-left:clamp(0px,5vw,88px);
+}
+
+/* --- the record card, in the page's own frosted glass — but clearer than the
+   shared --glass tokens: a thinner fill and a softer blur, so the valley behind
+   reads through the pane rather than sitting under frost. Deliberately local
+   rather than a change to --glass itself, which the doors, bill, social panel
+   and footer all share and which should stay frosted.
+
+   The text-shadow is what pays for the transparency: the backdrop mirrors the
+   carousel's active slide, so a bright one can slide in behind this pane, and
+   the copy has to hold up when it does. --- */
+.jimmy-card{
+  position:relative;color:var(--on-glass);
+  background:rgba(255,255,255,.06);
+  -webkit-backdrop-filter:blur(9px) saturate(122%);backdrop-filter:blur(9px) saturate(122%);
+  border:1px solid var(--glass-border);
+  border-radius:clamp(14px,1.6vw,20px);
+  box-shadow:var(--glass-shadow),var(--glass-hi);
+  padding:clamp(20px,2.2vw,28px) clamp(26px,4vw,58px) clamp(22px,2.4vw,30px) clamp(20px,2.2vw,28px);
+  text-shadow:0 1px 10px rgba(0,0,0,.5);
+}
+/* Keyline set in from the edge — the printed rule of a record card. */
+.jimmy-card::before{content:"";position:absolute;inset:7px;border:1px solid rgba(255,255,255,.13);border-radius:clamp(8px,1.1vw,14px);pointer-events:none}
+.jimmy-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding-bottom:12px;border-bottom:1px solid var(--glass-border)}
+/* Explicit colour, above `.nature-page h3` — on glass the heading has to carry
+   full contrast, not the dimmed tone the body copy uses. */
+.jimmy .jimmy-card-head h3{font-size:clamp(19px,2vw,25px);color:#fff;line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.jimmy-card-head .mono{font-size:11px;letter-spacing:.1em;color:var(--gold);white-space:nowrap}
+
+/* Label/value rows, the way a record sheet lists them: mono label, plain value,
+   hairline between. */
+.jimmy-specs{margin-top:clamp(12px,1.6vw,16px)}
+.jimmy-specs > div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
+.jimmy-specs dt{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.jimmy-specs dd{font-size:13.5px;color:var(--on-glass)}
+
+/* Labelled prose blocks — "ABOUT", "DID YOU KNOW?" — same idea as the rows but
+   given room to run. */
+.jimmy-note{margin-top:clamp(13px,1.7vw,18px)}
+.jimmy-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.jimmy-lead{margin-top:5px;font-size:13.5px;line-height:1.62;color:var(--on-glass-dim)}
+
+/* Signed in the same hand as the testimonial cards. */
+.jimmy-sign{margin-top:clamp(14px,1.8vw,20px);font-family:var(--font-hand),'Segoe Script',cursive;font-size:clamp(23px,2.6vw,30px);line-height:1.05;color:var(--gold)}
+
+/* The rating strip, stepped off the card's bottom-left corner onto cream stock
+   — a torn-off ticket rather than another pane. */
+.jimmy-rating{
+  position:relative;z-index:4;
+  display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin:calc(-1 * clamp(12px,1.6vw,22px)) 0 0 calc(-1 * clamp(6px,2.4vw,36px));
+  padding:9px clamp(13px,1.6vw,18px);
+  background:var(--paper);color:var(--ink);border-radius:2px;
+  transform:rotate(-1.1deg);
+  box-shadow:0 16px 30px -18px rgba(20,14,8,.8);
+}
+.jimmy-rating .mono{font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.jimmy-rating .s{color:var(--gold);font-size:14px;letter-spacing:2px;line-height:1}
+.jimmy-rating .dim{color:var(--stone)}
+
+/* --- loose snaps, dealt under the print's lower edge. Same paper and shadow as
+   the prints at a third the size, so the band reads as more of the same
+   scrapbook page and not a second gallery.
+   z-index:0 puts the whole row behind the print above it (z-index 3) — their
+   own 1/2/3 order stays contained here, and the stamp still lands on top. --- */
+.jimmy-snaps{
+  position:relative;z-index:0;
+  display:flex;align-items:flex-start;
+  margin-top:calc(-1 * clamp(8px,1.2vw,18px));
+  padding:0 clamp(36px,5.6vw,76px) 0 clamp(4px,1.4vw,20px);
+}
+.jimmy-snap{
+  position:relative;flex:0 0 auto;width:clamp(74px,9vw,112px);margin:0;
+  background:var(--paper);border-radius:2px;
+  padding:clamp(5px,.55vw,7px) clamp(5px,.55vw,7px) clamp(10px,1.1vw,15px);
+  box-shadow:0 18px 32px -20px rgba(20,14,8,.75),0 4px 9px -6px rgba(20,14,8,.4);
+  transition:transform .4s cubic-bezier(.2,.7,.2,1);
+}
+/* Square, the way a snap gets trimmed by hand. */
+.jimmy-snap .shot-img{aspect-ratio:1/1;border-radius:1px}
+/* Each one tilted and stepped against its neighbour, and overlapped by a
+   corner. Later snaps sit above earlier ones, as if dropped in order. */
+.jimmy-snap:nth-child(1){z-index:1;transform:rotate(-3.6deg)}
+.jimmy-snap:nth-child(2){
+  z-index:2;transform:rotate(2.2deg);
+  margin:clamp(12px,1.8vw,24px) 0 0 calc(-1 * clamp(8px,1.2vw,17px));
+}
+.jimmy-snap:nth-child(3){
+  z-index:3;transform:rotate(-1.6deg);
+  margin-left:calc(-1 * clamp(6px,1vw,14px));
+}
+/* Straightens on hover, matching the prints in the stack. */
+.jimmy-snap:hover{transform:rotate(0deg);z-index:4}
+
+/* --- the strip of prints. Capped so it never grows into a billboard, and
+   nudged past the right margin so it runs off the edge of the spread. --- */
+.jimmy-stack{width:min(100%,392px);margin-left:auto;margin-right:calc(-1 * clamp(0px,1.6vw,22px));display:flex;flex-direction:column}
+.jimmy-shot,.jimmy-print{
+  margin:0;background:var(--paper);border-radius:2px;
+  padding:clamp(7px,.8vw,10px) clamp(7px,.8vw,10px) 0;
+  box-shadow:0 28px 50px -28px rgba(20,14,8,.8),0 5px 12px -7px rgba(20,14,8,.45);
+  transition:transform .4s cubic-bezier(.2,.7,.2,1);
+}
+/* The two country shots pair up across the top of the strip, overlapping each
+   other by a corner and tucked *under* the print by its negative margin. */
+.jimmy-pair{
+  display:flex;align-items:flex-start;justify-content:flex-end;
+  margin-bottom:calc(-1 * clamp(12px,1.8vw,26px));
+  padding-left:clamp(6px,2vw,34px);
+}
+.jimmy-shot{position:relative;z-index:1;flex:0 0 auto;width:52%;padding-bottom:clamp(7px,.8vw,10px)}
+.jimmy-shot:first-child{transform:rotate(-2.8deg)}
+.jimmy-shot.is-low{z-index:2;margin:clamp(10px,1.4vw,20px) 0 0 calc(-1 * clamp(8px,1.4vw,20px));transform:rotate(2.4deg)}
+.jimmy-shot .shot-img{aspect-ratio:3/2;border-radius:1px}
+.jimmy-shot:hover{transform:rotate(0deg);z-index:3}
+
+/* Jimmy's print: the widest piece, nearly straight, lifted above the other two
+   and reaching left over the card. */
+.jimmy-print{
+  position:relative;z-index:3;
+  width:calc(100% + clamp(0px,2.4vw,34px));
+  margin-left:calc(-1 * clamp(0px,2.4vw,34px));
+  transform:rotate(-.8deg);
+  box-shadow:0 38px 64px -30px rgba(20,14,8,.86),0 6px 14px -7px rgba(20,14,8,.5);
+}
+.jimmy-print:hover{transform:rotate(0deg)}
 /* .avatar background is set inline (components/JimmyStrip.tsx) so a photo can
    layer over the gradient fallback. */
-.jimmy .avatar{height:clamp(150px,19vw,200px);border-radius:18px}
-.jimmy h2{font-size:clamp(24px,3.2vw,32px);color:#fff}
-.jimmy p{margin-top:14px;opacity:.95}
-@media(max-width:680px){.jimmy{grid-template-columns:1fr}}
+.jimmy .avatar{aspect-ratio:16/10;border-radius:1px}
+/* The caption sits in the print's lower margin, clear of the picture. Left
+   aligned with a wide right gutter: the stamp now hangs off that corner. */
+.jimmy-print figcaption{
+  font-family:var(--font-hand),'Segoe Script',cursive;
+  font-size:clamp(19px,2vw,25px);line-height:1;color:var(--olive-deep);
+  text-align:left;padding:clamp(9px,1.1vw,14px) clamp(64px,8vw,96px) clamp(11px,1.3vw,17px) clamp(4px,.8vw,10px);
+}
+/* A strip of tape across the top edge, holding the print down. The dashed sides
+   are the torn edges; the gradient is the sheen of the plastic. */
+.jimmy-tape{
+  position:absolute;z-index:4;top:clamp(-13px,-1vw,-9px);left:50%;
+  width:clamp(84px,9vw,124px);height:clamp(20px,2vw,27px);
+  transform:translateX(-58%) rotate(-1.6deg);
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(233,228,214,.72));
+  border-left:1px dashed rgba(33,28,36,.16);border-right:1px dashed rgba(33,28,36,.16);
+  box-shadow:0 2px 7px -4px rgba(20,14,8,.6);
+}
+/* The credit, set straight onto the photo's lower-left corner — no tag, no
+   fill. It is what marks the middle print as him rather than more country. */
+.jimmy-frame{position:relative}
+/* Just enough shade under the corner to hold the type over grass or sky. It
+   fades out well before the middle of the frame, so it reads as light falling
+   off rather than a panel. */
+.jimmy-frame::after{
+  content:"";position:absolute;inset:auto 0 0;height:42%;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(10,16,9,.72));
+}
+.jimmy-callout{
+  position:absolute;z-index:3;left:clamp(11px,1.5vw,17px);bottom:clamp(9px,1.2vw,14px);
+  color:#fff;font-weight:bold;
+  font-family:var(--font-mono),'IBM Plex Mono',monospace;
+  font-size:clamp(11px,1.05vw,13px);letter-spacing:.1em;text-transform:uppercase;
+  text-shadow:0 1px 3px rgba(0,0,0,.6),0 2px 16px rgba(0,0,0,.7);
+}
+/* The role in gold, so the name reads first and the line still lifts off the
+   photo rather than greying into it. */
+.jimmy-callout em{font-style:normal;font-weight:500;color:var(--gold)}
+
+/* Rubber stamp over the print's bottom-right edge — half on the paper, half
+   off it. It sits opposite the credit so the two never meet. */
+.jimmy-seal{
+  position:absolute;z-index:5;
+  width:clamp(74px,8vw,104px);height:clamp(74px,8vw,104px);
+  right:calc(-1 * clamp(14px,2.2vw,34px));bottom:calc(-1 * clamp(10px,1.6vw,24px));
+  color:var(--olive-deep);transform:rotate(-9deg);
+  filter:drop-shadow(0 10px 16px rgba(20,14,8,.5));
+}
+.jimmy-seal-disc{fill:var(--paper)}
+.jimmy-seal-text{font-family:var(--font-mono),monospace;font-weight:500}
+.jimmy-seal-big{font-family:var(--font-display);font-size:19px;font-weight:bold}
+.jimmy-seal-sub{font-family:var(--font-mono),monospace;font-size:7px;letter-spacing:1.6px}
+
+/* Stacked: the strip goes above the card, still stepped and overlapping, and
+   the seal pulls in so it can't hang off the edge of a narrow screen. */
+@media(max-width:900px){
+  .jimmy-scrap{grid-template-columns:1fr;gap:clamp(24px,5vw,36px);padding-left:0}
+  .jimmy-stack{order:-1;width:min(100%,470px);margin:0 auto}
+  /* Still the widest piece of the three, but no longer edge to edge. */
+  .jimmy-print{width:min(100%,410px);margin:0 auto}
+  .jimmy-seal{right:calc(-1 * clamp(6px,2vw,22px));bottom:clamp(30px,7vw,60px)}
+  .jimmy-card{padding-right:clamp(20px,3vw,28px)}
+}
+@media(max-width:560px){
+  .jimmy-seal{width:70px;height:70px}
+  .jimmy-shot{width:70%}
+  .jimmy-rating{margin-left:0}
+  /* Centred under the card once the ticket no longer steps off the corner. */
+  .jimmy-snaps{justify-content:center;padding-left:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .jimmy-shot,.jimmy-print,.jimmy-snap{transition:none}
+}
 
 /* social follow band */
 .social{background:var(--ink);color:var(--paper);border-radius:clamp(16px,2.2vw,24px);margin:0 0 var(--section);padding:clamp(26px,4vw,44px);display:flex;justify-content:space-between;align-items:center;gap:clamp(18px,2.8vw,32px);flex-wrap:wrap}
@@ -366,7 +641,7 @@ footer{background:var(--ink);color:var(--oat);padding:clamp(38px,5.6vw,54px) 0}
 .dc-region{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(8px,1.2vh,12px);font-family:var(--font-mono),'IBM Plex Mono',monospace;font-size:clamp(10px,.85vw,12px);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:clamp(10px,1.6vh,16px)}
 .dc-region::before{content:"";width:34px;height:2px;background:var(--gold);opacity:.9}
 /* tier 2 — the headline: dominant */
-.dc-title{font-family:var(--font-display);font-size:clamp(34px,6vw,84px);line-height:.98;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.45)}
+.dc-title{font-family:var(--font-display);font-weight:bold;font-size:clamp(34px,6vw,84px);line-height:.98;text-transform:uppercase;letter-spacing:-.03em;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.45)}
 /* tier 3 — supporting copy: quieter than the headline */
 .dc-blurb{max-width:34ch;margin:clamp(12px,2vh,18px) 0 clamp(18px,3vh,26px);font-size:clamp(14px,1.15vw,15px);line-height:1.55;color:rgba(255,255,255,.78)}
 .dc-cta{display:flex;gap:12px;flex-wrap:wrap}
@@ -667,11 +942,12 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
    soft shadow so they hold up over the brighter patches of the photo. The ones
    inside glass panels don't need it — their pane already separates them. */
 .nature-page .builder-title,
+.nature-page .motto-kicker,
 .nature-page .tmns-title{text-shadow:0 2px 18px rgba(0,0,0,.45)}
 
-/* Shared pane recipe. -webkit- prefix kept for Safari, which still needs it. */
+/* Shared pane recipe. -webkit- prefix kept for Safari, which still needs it.
+   The jimmy section is deliberately absent — it has no pane, it floats. */
 .nature-page .door,
-.nature-page .jimmy,
 .nature-page .social,
 .nature-page .bill{
   -webkit-backdrop-filter:var(--glass-blur);
@@ -741,15 +1017,15 @@ header.scrolled{box-shadow:0 10px 30px -20px rgba(33,28,36,.5)}
    the way the solid olive-deep block used to. Its inner type is already light. */
 .nature-page .bill{background:linear-gradient(160deg,rgba(60,74,20,.46),rgba(16,22,14,.52))}
 
-/* Jimmy strip: sea tint through glass. Inner text is already white. */
-.nature-page .jimmy{background:linear-gradient(158deg,rgba(14,140,140,.34),rgba(255,255,255,.05))}
-
 /* Social band: neutral glass; the platform buttons keep their brand colours. */
 .nature-page .social{background:var(--glass)}
 
 /* Testimonials: the paper postcards stay as they are — physical props that
    pop against the backdrop — but the surrounding aside and controls go light. */
 .nature-page .tmns-title{color:var(--on-glass)}
+/* …which means the postcard headings have to be put back: they're h3s, so the
+   blanket `.nature-page h3` rule above was painting them near-white on cream. */
+.nature-page .tmn-title{color:var(--ink)}
 .nature-page .tmns-lead{color:var(--on-glass-dim)}
 .nature-page .tmns-hint{color:var(--on-glass-dim)}
 .nature-page .tmns-badge{color:var(--gold)}
@@ -825,7 +1101,7 @@ header.overlay.scrolled{
    above are semi-opaque on their own — but nudge the fills up so nothing turns
    into unreadable near-transparent glass. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  .nature-page .door,.nature-page .jimmy,.nature-page .social,
+  .nature-page .door,.nature-page .social,.nature-page .jimmy-card,
   .nature-page .bill,.nature-page footer,header.overlay.scrolled{
     background:rgba(16,22,16,.85);
   }
